@@ -2,12 +2,18 @@
 
 
 ### flows
-m0in=
-m0out=
-m2in=
-m2out=
-m1in=
-m1out=
+m0in= PSOS
+m2out= PSOS
+m1out= PSOS
+
+if CCH_1 =1:				# ACM is working or we are heating
+			m0out=30		# Angenommener Wert für ACM muss noch abgestimmt werden
+			m1in=30
+			m2in=30;
+		else 
+			m0out=PC_1
+			m1in=PC_1
+			m2in=PC_1;
 
 
 #first Layer
