@@ -7,45 +7,30 @@ import casadi as ca
 # Constants
 
 
-rho_air = 1.2
 
-cp_air = 1005.0
 cp_water = 4182.0
 
 
 
-cv_number = 5
-
-radiator_element_number = 106.0
-radiator_element_length = 0.045
-tube_diameter_horizontal = 0.05
-radiator_tubes_element = 2.0
-tube_length_vertical = 0.4
-tube_diameter_vertical = 0.0255
-
-
-radiator_element_mass = 0.35
-
-cv_m = (radiator_element_mass * radiator_element_number) / cv_number
-
-
 # States
 
-x = ca.MX.sym("x", 6)
+x = ca.MX.sym("x", 4)
 
-room_temperature = x[0]
-radiator_cv_temperature  = x[1:]
+TSH0 = x[0]
+TSH2  = x[1]
+TSH3  = x[2]
+TSH1  = x[3]
 
 # Parameters
 
-# p = ca.MX.sym("p", 1)
+# # p = ca.MX.sym("p", 1)
 
-u_glass = 0.2 # 2.0
-u_wall =  0.0786715 # see: room_pe_step1_night.py
+# u_glass = 0.2 # 2.0
+# u_wall =  0.0786715 # see: room_pe_step1_night.py
 
-window_transmission = 0.00195234 # see: room_pe_step2_day.py
+# window_transmission = 0.00195234 # see: room_pe_step2_day.py
 
-u_radiator = 0.286806
+# u_radiator = 0.286806
 
 
 # pinit = ca.vertcat([u_radiator_init])
