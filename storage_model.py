@@ -75,8 +75,8 @@ system = cp.system.System(x = x, u = u, f = f)#, p = p, phi = phi)
 
 # Start heating
 
-int_start = 9300
-int_end = 9400
+int_start = 0
+int_end = 1000
 steps = 1
 
 # int_start = 10800
@@ -94,8 +94,6 @@ data = pd.read_table("data20161015.csv", \
 for k,e in enumerate(int_start):
 
     time_points = pl.linspace(0, int_end[k] - e - 1, int_end[k] - e) 
-
-    ydata = data["TemperatureInside"][e:int_end[k]:int_step].values
 
     udata_0 = data["PSOS"][e:int_end[k]-1:int_step].values
 
@@ -124,15 +122,15 @@ for k,e in enumerate(int_start):
 
     #y1_5_init = pl.linspace(udata_3[0], t_outlet[0], 5) #from pe_step3
 
-    xinit = ca.horzcat([pl.atleast_2d(x0_init).T, ca.repmat(y1_5_init, (1, ydata.shape[0])).T]) #????
+    xinit = ca.horzcat([pl.atleast_2d(x0_init).T, pl.atleast_2d(x1_init).T, pl.atleast_2d(x2_init).T, pl.atleast_2d(x3_init).T,]) #????
 
     # wv = pl.ones(ydata.shape[0])
     # wv[:int(ydata.shape[0]*0.1)] = 5
 
     pe_setups.append(cp.pe.LSq(system = system, time_points = time_points, \
         udata = udata, \
-        pinit = pinit, \
-        ydata = ydata, \
+        #pinit = pinit, \
+        #ydata = ydata, \
         xinit = xinit)) #, \
         # wv = wv))
 
@@ -150,3 +148,32 @@ pl.close("all")
 
 
 # # Plot
+
+plt.figure(figsize= (8,7))
+
+plt.subplot(2, 1, 1)
+plt.plot(tgrid,x[0],'--')
+plt.plot(tgrid,x[1],'--')
+plt.plot(tgrid,x[2],'--')
+plt.plot(tgrid,x[3],'--')
+plt.plot(tgrid,u[0],'--')
+plt.plot(tgrid,u[1],'--')
+plt.plot(tgrid,u[2],'--')
+plt.plot(tgrid,u[3],'--')
+plt.plot(tgrid,u[4],'--')
+plt.plot(tgrid,u[5],'--')
+plt.plot(tgrid,u[6],'--')
+plt.plot(tgrid,u[7],'--')
+plt.title("storage model")
+plt.ylabel('temperature (C)')
+plt.xlabel('time (s)')
+
+
+# plt.show()
+
+plt.savefig("/tmp/storage/" + str(data) + "_" \
+  + str(int_start) + "-" \
+  + str(int_end)+ "storage.png", \
+        bbox_inches='tight')
+
+
