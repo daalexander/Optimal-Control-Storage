@@ -60,10 +60,93 @@ dotT3 = 1/m3 * ((-PSOS*VSHP_OP +PSOS -PC_1 +PC_1*VSHS_OP +m2plus) * TSH2 - m2plu
 #fourth Layer
 dotT1 = 1/m1(-PSOS*VSHP_CL * TSH1 + (-PSOS*VSHP_OP +PSOS -PC_1 +PC_1*VSHS_OP  +m3plus) * TSH3 - m3plus * TSH1 + PC_1*VSHS_CL * TCO_1)
 
+#ODE
 
-
-dxdt = ca.vertcat( \
+f = ca.vertcat( \
     dotT0, \
     dotT2, \
     dotT3, \
     dotT1)
+
+#phi = room_temperature
+
+system = cp.system.System(x = x, u = u, f = f)#, p = p, phi = phi)
+
+
+# Start heating
+
+int_start = 9300
+int_end = 9400
+steps = 1
+
+# int_start = 10800
+# int_end = 11500
+# steps = 1
+
+TSH0 = x[0]
+TSH2  = x[1]
+TSH3  = x[2]
+TSH1  = x[3]
+
+data = pd.read_table("data20161015.csv", \
+    delimiter=";", index_col=0)
+
+for k,e in enumerate(int_start):
+
+    time_points = pl.linspace(0, int_end[k] - e - 1, int_end[k] - e) 
+
+    ydata = data["TemperatureInside"][e:int_end[k]:int_step].values
+
+    udata_0 = data["PSOS"][e:int_end[k]-1:int_step].values
+
+    udata_1 = data["PC_1"][e:int_end[k]-1:int_step].values 
+
+    udata_2 = data["m0minus"][e:int_end[k]-1:int_step].values 
+
+    udata_3 = data["m0plus"][e:int_end[k]-1:int_step].values
+
+    udata_4 = data["m2minus"][e:int_end[k]-1:int_step].values
+
+    udata_5 = data["m2plus"][e:int_end[k]-1:int_step].values 
+
+    udata_6 = data["m3minus"][e:int_end[k]-1:int_step].values 
+
+    udata_7 = data["m3plus"][e:int_end[k]-1:int_step].values
+
+    udata = ca.horzcat([udata_0, udata_1, udata_2, udata_3, udata_4, udata_5, udata_6, udata_7])
+
+    #t_outlet = data["Outlet"][e:int_end[k]-1:int_step].values #from pe_step3
+
+    x0_init = TSH0
+    x1_init = TSH2
+    x2_init = TSH3
+    x3_init = TSH1
+
+    #y1_5_init = pl.linspace(udata_3[0], t_outlet[0], 5) #from pe_step3
+
+    xinit = ca.horzcat([pl.atleast_2d(x0_init).T, ca.repmat(y1_5_init, (1, ydata.shape[0])).T]) #????
+
+    # wv = pl.ones(ydata.shape[0])
+    # wv[:int(ydata.shape[0]*0.1)] = 5
+
+    pe_setups.append(cp.pe.LSq(system = system, time_points = time_points, \
+        udata = udata, \
+        pinit = pinit, \
+        ydata = ydata, \
+        xinit = xinit)) #, \
+        # wv = wv))
+
+
+mpe = cp.pe.MultiLSq(pe_setups)
+# # mpe.run_parameter_estimation({"linear_solver": "ma57"})
+mpe.run_parameter_estimation()
+
+# sim_est = cp.sim.Simulation(system = system, pdata = est_parameter)
+sim_est = cp.sim.Simulation(system = system, pdata = mpe.estimated_parameters)
+# sim_est.run_system_simulation(time_points = time_points, \
+#     x0 = xinit[0,:], udata = udata)
+
+pl.close("all")
+
+
+# # Plot
