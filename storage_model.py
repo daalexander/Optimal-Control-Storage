@@ -1,6 +1,10 @@
 import pylab as pl
 import pandas as pd
 
+import sys # for home
+sys.path.append(r"C:\Users\alexa\Documents\Master\Python programme\casadi-py27-np1.9.1-v2.4.3")
+sys.path.append(r"C:\Users\alexa\Documents\Master\Python programme\casiopeia")
+
 import casadi as ca
 import casiopeia as cp
 
@@ -98,71 +102,67 @@ f = ca.vertcat([ \
     dotT3, \
     dotT1])
 
-# phi = x
+phi = x
 
-# system = cp.system.System(x = x, u = u, f = f, phi = phi)#, p = p)
-
-
-# # Start heating
-
-# int_start = 1
-# int_end = 1000
-# steps = 1
+system = cp.system.System(x = x, u = u, f = f, phi = phi)#, p = p)
 
 
-# TSH0 = x[0]
-# TSH2  = x[1]
-# TSH3  = x[2]
-# TSH1  = x[3]
+# Start heating
 
-# data = pd.read_table("data20161015.csv", \
-#     delimiter=",", index_col=0)
+int_start = 1
+int_end = 1000
+steps = 1
 
-# for k,e in enumerate(int_start):
 
-#     time_points = pl.linspace(0, int_end[k] - e - 1, int_end[k] - e) * 13 #*13 for seconds
 
-#     udata_0 = data["PSOS"][e:int_end[k]-1:int_step].values
+data = pd.read_table("geandertedaten20161015.csv", \
+    delimiter=",", index_col=0)
 
-#     udata_1 = data["PC_1"][e:int_end[k]-1:int_step].values 
+for k,e in enumerate(int_start):
 
-#     udata_2 = data["m0minus"][e:int_end[k]-1:int_step].values 
+    time_points = pl.linspace(0, int_end[k] - e - 1, int_end[k] - e) * 13 #*13 for seconds
 
-#     udata_3 = data["m0plus"][e:int_end[k]-1:int_step].values
+    udata_0 = data["PSOS"][e:int_end[k]-1:int_step].values
 
-#     udata_4 = data["m2minus"][e:int_end[k]-1:int_step].values
+    udata_1 = data["PC_1"][e:int_end[k]-1:int_step].values 
 
-#     udata_5 = data["m2plus"][e:int_end[k]-1:int_step].values 
+    udata_2 = data["m0minus"][e:int_end[k]-1:int_step].values 
 
-#     udata_6 = data["m3minus"][e:int_end[k]-1:int_step].values 
+    udata_3 = data["m0plus"][e:int_end[k]-1:int_step].values
 
-#     udata_7 = data["m3plus"][e:int_end[k]-1:int_step].values
+    udata_4 = data["m2minus"][e:int_end[k]-1:int_step].values
 
-#     udata_8 = data["TSOS"][e:int_end[k]-1:int_step].values
+    udata_5 = data["m2plus"][e:int_end[k]-1:int_step].values 
 
-#     udata_9 = data["TCO_1"][e:int_end[k]-1:int_step].values
+    udata_6 = data["m3minus"][e:int_end[k]-1:int_step].values 
 
-#     # udata_10 = data["VSHP_OP"][e:int_end[k]-1:int_step].values
+    udata_7 = data["m3plus"][e:int_end[k]-1:int_step].values
 
-#     # udata_11 = data["VSHP_CL"][e:int_end[k]-1:int_step].values
+    udata_8 = data["TSOS"][e:int_end[k]-1:int_step].values
 
-#     # udata_12 = data["VSHS_OP"][e:int_end[k]-1:int_step].values
+    udata_9 = data["TCO_1"][e:int_end[k]-1:int_step].values
 
-#     # udata_13 = data["VSHS_CL"][e:int_end[k]-1:int_step].values
+    # udata_10 = data["VSHP_OP"][e:int_end[k]-1:int_step].values
 
-#     udata = ca.horzcat([udata_0, udata_1, udata_2, udata_3, udata_4, udata_5, udata_6, udata_7, udata_8, udata_9])#, \
-#         # udata_10, udata_11, udata_12, udata_13])
+    # udata_11 = data["VSHP_CL"][e:int_end[k]-1:int_step].values
 
-#     #t_outlet = data["Outlet"][e:int_end[k]-1:int_step].values #from pe_step3
+    # udata_12 = data["VSHS_OP"][e:int_end[k]-1:int_step].values
 
-#     x0_init = TSH0
-#     x1_init = TSH2
-#     x2_init = TSH3
-#     x3_init = TSH1
+    # udata_13 = data["VSHS_CL"][e:int_end[k]-1:int_step].values
 
-#     #y1_5_init = pl.linspace(udata_3[0], t_outlet[0], 5) #from pe_step3
+    udata = ca.horzcat([udata_0, udata_1, udata_2, udata_3, udata_4, udata_5, udata_6, udata_7, udata_8, udata_9])#, \
+        # udata_10, udata_11, udata_12, udata_13])
 
-#     xinit = ca.horzcat([pl.atleast_2d(x0_init).T, pl.atleast_2d(x1_init).T, pl.atleast_2d(x2_init).T, pl.atleast_2d(x3_init).T,]) #????
+    # #t_outlet = data["Outlet"][e:int_end[k]-1:int_step].values #from pe_step3
+
+    # x0_init = TSH0
+    # x1_init = TSH2
+    # x2_init = TSH3
+    # x3_init = TSH1
+
+    # #y1_5_init = pl.linspace(udata_3[0], t_outlet[0], 5) #from pe_step3
+
+    # xinit = ca.horzcat([pl.atleast_2d(x0_init).T, pl.atleast_2d(x1_init).T, pl.atleast_2d(x2_init).T, pl.atleast_2d(x3_init).T,]) #????
 
 #     # wv = pl.ones(ydata.shape[0])
 #     # wv[:int(ydata.shape[0]*0.1)] = 5
