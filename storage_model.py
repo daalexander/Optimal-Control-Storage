@@ -1,12 +1,13 @@
 import pylab as pl
 import pandas as pd
 
-import sys # for home
-sys.path.append(r"C:\Users\alexa\Documents\Master\Python programme\casadi-py27-np1.9.1-v2.4.3")
-sys.path.append(r"C:\Users\alexa\Documents\Master\Python programme\casiopeia")
+# import sys # for home
+# sys.path.append(r"C:\Users\alexa\Documents\Master\Python programme\casadi-py27-np1.9.1-v2.4.3")
+# sys.path.append(r"C:\Users\alexa\Documents\Master\Python programme\casiopeia")
 
 import casadi as ca
 import casiopeia as cp
+import matplotlib.pyplot as plt
 
 
 # Constants
@@ -27,17 +28,18 @@ TSH1  = x[3]
 
 # Parameters
 
-# p = ca.MX.sym("p", 1)
+p = ca.MX.sym("p", 1)
+alpha_iso = p[0]
 
-# pinit = ca.vertcat([u_radiator_init])
+# pinit = ca.vertcat([u_radiator_init]) # frpm pe_step3
 
 
 # Controls
 
 u = ca.MX.sym("u", 10)
 
-PSOS = u[0]
-PC_1 = u[1]
+V_PSOS = u[0]
+V_PC_1 = u[1]
 m0minus = u[2]
 m0plus = u[3]
 m2minus = u[4]
@@ -51,46 +53,48 @@ TCO_1 = u[9]
 # VSHS_OP = u[12]
 # VSHS_CL = u[13]
 
+
+
 m = 2000.0 / layer
 
 # Massflows storage
 
 ## without VSHS_CL/OP and VSHP_CL/OP
 #first Layer
-dotT0 = 1.0/m * (PSOS * TSOS - PC_1 * TSH0 - (m0plus + PSOS - PC_1) * TSH0 + m0plus * TSH2) 
-#m0minus = m0plus + PSOS - PC_1 
+dotT0 = 1.0/m * (V_PSOS * TSOS - V_PC_1 * TSH0 - (m0plus + V_PSOS - V_PC_1) * TSH0 + m0plus * TSH2) + alpha_iso
+#m0minus = m0plus + V_PSOS - V_PC_1 
 
 #second Layer
-dotT2 = 1.0/m * ( -PSOS * TSH2 + PC_1 * TCO_1 + (m0plus + PSOS - PC_1) * TSH0 - m0plus * TSH2  \
-    - (-PSOS + PSOS - PC_1 + PC_1 + m2plus) * TSH2 + m2plus * TSH3)
-#m2minus = -PSOS +PSOS -PC_1 +PC_1 +m2plus
+dotT2 = 1.0/m * ( -V_PSOS * TSH2 + V_PC_1 * TCO_1 + (m0plus + V_PSOS - V_PC_1) * TSH0 - m0plus * TSH2  \
+    - (-V_PSOS + V_PSOS - V_PC_1 + V_PC_1 + m2plus) * TSH2 + m2plus * TSH3)
+#m2minus = -V_PSOS +V_PSOS -V_PC_1 +V_PC_1 +m2plus
 
 #third Layer
-dotT3 = 1.0/m * ((-PSOS + PSOS - PC_1 + PC_1 + m2plus) * TSH2 - m2plus * TSH3 \
-    - (-PSOS + PSOS - PC_1 + PC_1  + m3plus) * TSH1 + m3plus * TSH1)
-#m3minus = -PSOS +PSOS -PC_1 +PC_1  +m3plus
+dotT3 = 1.0/m * ((-V_PSOS + V_PSOS - V_PC_1 + V_PC_1 + m2plus) * TSH2 - m2plus * TSH3 \
+    - (-V_PSOS + V_PSOS - V_PC_1 + V_PC_1  + m3plus) * TSH1 + m3plus * TSH1)
+#m3minus = -V_PSOS +V_PSOS -V_PC_1 +V_PC_1  +m3plus
 
 #fourth Layer
-dotT1 = 1.0/m * (-PSOS * TSH1 + (-PSOS + PSOS - PC_1 + PC_1  + m3plus) * TSH3 - m3plus * TSH1 + PC_1 * TCO_1)
+dotT1 = 1.0/m * (-V_PSOS * TSH1 + (-V_PSOS + V_PSOS - V_PC_1 + V_PC_1  + m3plus) * TSH3 - m3plus * TSH1 + V_PC_1 * TCO_1)
 
 #=================================================================================================================================================
 ## with VSHS_CL/OP and VSHP_CL/OP
 # #first Layer
-# dotT0 = 1.0/m * (PSOS * TSOS - PC_1 * TSH0 - (m0plus + PSOS - PC_1) * TSH0 + m0plus * TSH2) 
-# #m0minus = m0plus + PSOS - PC_1 
+# dotT0 = 1.0/m * (V_PSOS * TSOS - V_PC_1 * TSH0 - (m0plus + V_PSOS - V_PC_1) * TSH0 + m0plus * TSH2) 
+# #m0minus = m0plus + V_PSOS - V_PC_1 
 
 # #second Layer
-# dotT2 = 1.0/m * ( -PSOS * VSHP_OP * TSH2 + PC_1 * VSHS_OP * TCO_1 + (m0plus + PSOS - PC_1) * TSH0 - m0plus * TSH2  \
-#     - (-PSOS * VSHP_OP + PSOS - PC_1 + PC_1 * VSHS_OP + m2plus) * TSH2 + m2plus * TSH3)
-# #m2minus = -PSOS*VSHP_OP +PSOS -PC_1 +PC_1*VSHS_OP +m2plus
+# dotT2 = 1.0/m * ( -V_PSOS * VSHP_OP * TSH2 + V_PC_1 * VSHS_OP * TCO_1 + (m0plus + V_PSOS - V_PC_1) * TSH0 - m0plus * TSH2  \
+#     - (-V_PSOS * VSHP_OP + V_PSOS - V_PC_1 + V_PC_1 * VSHS_OP + m2plus) * TSH2 + m2plus * TSH3)
+# #m2minus = -V_PSOS*VSHP_OP +V_PSOS -V_PC_1 +V_PC_1*VSHS_OP +m2plus
 
 # #third Layer
-# dotT3 = 1.0/m * ((-PSOS * VSHP_OP + PSOS - PC_1 + PC_1 * VSHS_OP + m2plus) * TSH2 - m2plus * TSH3 \
-#     - (-PSOS * VSHP_OP + PSOS - PC_1 + PC_1 * VSHS_OP  + m3plus) * TSH1 + m3plus * TSH1)
-# #m3minus = -PSOS*VSHP_OP +PSOS -PC_1 +PC_1*VSHS_OP  +m3plus
+# dotT3 = 1.0/m * ((-V_PSOS * VSHP_OP + V_PSOS - V_PC_1 + V_PC_1 * VSHS_OP + m2plus) * TSH2 - m2plus * TSH3 \
+#     - (-V_PSOS * VSHP_OP + V_PSOS - V_PC_1 + V_PC_1 * VSHS_OP  + m3plus) * TSH1 + m3plus * TSH1)
+# #m3minus = -V_PSOS*VSHP_OP +V_PSOS -V_PC_1 +V_PC_1*VSHS_OP  +m3plus
 
 # #fourth Layer
-# dotT1 = 1.0/m * (-PSOS * VSHP_CL * TSH1 + (-PSOS * VSHP_OP + PSOS - PC_1 + PC_1 * VSHS_OP  + m3plus) * TSH3 - m3plus * TSH1 + PC_1 * VSHS_CL * TCO_1)
+# dotT1 = 1.0/m * (-V_PSOS * VSHP_CL * TSH1 + (-V_PSOS * VSHP_OP + V_PSOS - V_PC_1 + V_PC_1 * VSHS_OP  + m3plus) * TSH3 - m3plus * TSH1 + V_PC_1 * VSHS_CL * TCO_1)
 #=================================================================================================================================================
 
 
@@ -104,14 +108,14 @@ f = ca.vertcat([ \
 
 phi = x
 
-system = cp.system.System(x = x, u = u, f = f, phi = phi)#, p = p)
+system = cp.system.System(x = x, u = u, f = f, phi = phi, p = p)
 
 
 # Start heating
 
-int_start = 1
-int_end = 1000
-steps = 1
+int_start = [1]
+int_end = [1000]
+int_step = 1
 
 
 
@@ -122,9 +126,9 @@ for k,e in enumerate(int_start):
 
     time_points = pl.linspace(0, int_end[k] - e - 1, int_end[k] - e) * 13 #*13 for seconds
 
-    udata_0 = data["PSOS"][e:int_end[k]-1:int_step].values
+    udata_0 = data["V_PSOS"][e:int_end[k]-1:int_step].values
 
-    udata_1 = data["PC_1"][e:int_end[k]-1:int_step].values 
+    udata_1 = data["V_PC_1"][e:int_end[k]-1:int_step].values 
 
     udata_2 = data["m0minus"][e:int_end[k]-1:int_step].values 
 
@@ -153,16 +157,15 @@ for k,e in enumerate(int_start):
     udata = ca.horzcat([udata_0, udata_1, udata_2, udata_3, udata_4, udata_5, udata_6, udata_7, udata_8, udata_9])#, \
         # udata_10, udata_11, udata_12, udata_13])
 
-    # #t_outlet = data["Outlet"][e:int_end[k]-1:int_step].values #from pe_step3
 
-    # x0_init = TSH0
-    # x1_init = TSH2
-    # x2_init = TSH3
-    # x3_init = TSH1
 
-    # #y1_5_init = pl.linspace(udata_3[0], t_outlet[0], 5) #from pe_step3
+    x0_init = 60.1#TSH0 60.1
+    x1_init = 59.4#TSH2 59.4
+    x2_init = 57.5#TSH3 57.5
+    x3_init = 52.8#TSH1 52.8
+    
 
-    # xinit = ca.horzcat([pl.atleast_2d(x0_init).T, pl.atleast_2d(x1_init).T, pl.atleast_2d(x2_init).T, pl.atleast_2d(x3_init).T,]) #????
+    xinit = ca.horzcat([pl.atleast_2d(x0_init).T, pl.atleast_2d(x1_init).T, pl.atleast_2d(x2_init).T, pl.atleast_2d(x3_init).T,]) 
 
 #     # wv = pl.ones(ydata.shape[0])
 #     # wv[:int(ydata.shape[0]*0.1)] = 5
@@ -179,41 +182,63 @@ for k,e in enumerate(int_start):
 # # # mpe.run_parameter_estimation({"linear_solver": "ma57"})
 # mpe.run_parameter_estimation()
 
-# # sim_est = cp.sim.Simulation(system = system, pdata = est_parameter)
+sim_est = cp.sim.Simulation(system = system, pdata = 0.0)
 # sim_est = cp.sim.Simulation(system = system, pdata = mpe.estimated_parameters)
-# # sim_est.run_system_simulation(time_points = time_points, \
-# #     x0 = xinit[0,:], udata = udata)
+sim_est.run_system_simulation(time_points = time_points, \
+    x0 = xinit[0,:], udata = udata)
 
-# pl.close("all")
+
+
+
+pl.close("all")
 
 
 # # # Plot
 
+
+
+
+pl.figure(figsize= (8,7))
+
+pl.subplot(1, 1, 1)
+pl.plot(udata)
+# pl.plot(x[0])
+# pl.plot(x[1])
+# pl.plot(x[2])
+# pl.plot(x[3])
+pl.title("storage model")
+pl.ylabel('temperature (C)')
+pl.xlabel('time (s)')
+
+
+
 # plt.figure(figsize= (8,7))
 
 # plt.subplot(2, 1, 1)
-# plt.plot(tgrid,x[0],'--')
-# plt.plot(tgrid,x[1],'--')
-# plt.plot(tgrid,x[2],'--')
-# plt.plot(tgrid,x[3],'--')
-# plt.plot(tgrid,u[0],'--')
-# plt.plot(tgrid,u[1],'--')
-# plt.plot(tgrid,u[2],'--')
-# plt.plot(tgrid,u[3],'--')
-# plt.plot(tgrid,u[4],'--')
-# plt.plot(tgrid,u[5],'--')
-# plt.plot(tgrid,u[6],'--')
-# plt.plot(tgrid,u[7],'--')
+# plt.plot(x[0],'--')
+# plt.plot(x[1],'--')
+# plt.plot(x[2],'--')
+# plt.plot(x[3],'--')
+# plt.plot(u[0],'--')
+# plt.plot(u[1],'--')
+# plt.plot(u[2],'--')
+# plt.plot(u[3],'--')
+# plt.plot(u[4],'--')
+# plt.plot(u[5],'--')
+# plt.plot(u[6],'--')
+# plt.plot(u[7],'--')
+# plt.plot(u[8],'--')
+# plt.plot(u[9],'--')
 # plt.title("storage model")
 # plt.ylabel('temperature (C)')
 # plt.xlabel('time (s)')
 
 
-# plt.show()
 
-# plt.savefig("/tmp/storage/" + str(data) + "_" \
-#   + str(int_start) + "-" \
-#   + str(int_end)+ "storage.png", \
-#         bbox_inches='tight')
+pl.show()
 
-
+pl.savefig("/tmp/storage/" + #str(data) + "_" \
+  # + str(int_start) + "-" \
+  #+ str(int_end)+\
+   "storage.png", \
+        bbox_inches='tight')
