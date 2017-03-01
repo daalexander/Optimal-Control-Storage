@@ -33,7 +33,7 @@ TSH1  = x[3]
 p = ca.MX.sym("p", 1)
 alpha_iso = p[0]
 
-# pinit = ca.vertcat([u_radiator_init]) # frpm pe_step3
+# pinit = ca.vertcat([u_radiator_init]) # from pe_step3
 
 
 # Controls
@@ -41,7 +41,7 @@ alpha_iso = p[0]
 u = ca.MX.sym("u", 14)
 
 V_PSOS = u[0]
-msto = u[1] #*0.3
+msto = u[1] 
 m0minus = u[2]
 m0plus = u[3]
 m2minus = u[4]
@@ -122,7 +122,7 @@ int_start = 0
 
 
 #20161015 "Intervalle/20160303_Intervall7.csv"
-data = pd.read_table("data-probe/"+ datatable + ".csv", \
+data = pd.read_table("data-ausgewertet/"+ datatable + ".csv", \
     delimiter=",", index_col=0)
 
 # for k,e in enumerate(int_start):
