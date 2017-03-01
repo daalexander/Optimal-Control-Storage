@@ -10,7 +10,7 @@ import casiopeia as cp
 import matplotlib.pyplot as plt
 
 #############################
-datatable = "data20161008"
+datatable = "data2017-02-23"
 #############################
 
 
@@ -41,7 +41,7 @@ alpha_iso = p[0]
 u = ca.MX.sym("u", 14)
 
 V_PSOS = u[0]
-V_PC_1 = u[1] #*0.3
+msto = u[1] #*0.3
 m0minus = u[2]
 m0plus = u[3]
 m2minus = u[4]
@@ -63,41 +63,41 @@ m = 2000.0 / layer
 
 # ## without VSHS_CL/OP and VSHP_CL/OP
 # #first Layer
-# dotT0 = 1.0/m * (V_PSOS * TSOS - V_PC_1 * TSH0 - (m0plus + V_PSOS - V_PC_1) * TSH0 + m0plus * TSH2) + alpha_iso
-# #m0minus = m0plus + V_PSOS - V_PC_1 
+# dotT0 = 1.0/m * (V_PSOS * TSOS - msto * TSH0 - (m0plus + V_PSOS - msto) * TSH0 + m0plus * TSH2) + alpha_iso
+# #m0minus = m0plus + V_PSOS - msto 
 
 # #second Layer
-# dotT2 = 1.0/m * ( -V_PSOS * TSH2 + V_PC_1 * TCO_1 + (m0plus + V_PSOS - V_PC_1) * TSH0 - m0plus * TSH2  \
-#     - (-V_PSOS + V_PSOS - V_PC_1 + V_PC_1 + m2plus) * TSH2 + m2plus * TSH3)
-# #m2minus = -V_PSOS +V_PSOS -V_PC_1 +V_PC_1 +m2plus
+# dotT2 = 1.0/m * ( -V_PSOS * TSH2 + msto * TCO_1 + (m0plus + V_PSOS - msto) * TSH0 - m0plus * TSH2  \
+#     - (-V_PSOS + V_PSOS - msto + msto + m2plus) * TSH2 + m2plus * TSH3)
+# #m2minus = -V_PSOS +V_PSOS -msto +msto +m2plus
 
 # #third Layer
-# dotT3 = 1.0/m * ((-V_PSOS + V_PSOS - V_PC_1 + V_PC_1 + m2plus) * TSH2 - m2plus * TSH3 \
-#     - (-V_PSOS + V_PSOS - V_PC_1 + V_PC_1  + m3plus) * TSH3 + m3plus * TSH1)
-# #m3minus = -V_PSOS +V_PSOS -V_PC_1 +V_PC_1  +m3plus
+# dotT3 = 1.0/m * ((-V_PSOS + V_PSOS - msto + msto + m2plus) * TSH2 - m2plus * TSH3 \
+#     - (-V_PSOS + V_PSOS - msto + msto  + m3plus) * TSH3 + m3plus * TSH1)
+# #m3minus = -V_PSOS +V_PSOS -msto +msto  +m3plus
 
 # #fourth Layer
-# dotT1 = 1.0/m * (-V_PSOS * TSH1 + (-V_PSOS + V_PSOS - V_PC_1 + V_PC_1  + m3plus) * TSH3 - m3plus * TSH1 + V_PC_1 * TCO_1)
+# dotT1 = 1.0/m * (-V_PSOS * TSH1 + (-V_PSOS + V_PSOS - msto + msto  + m3plus) * TSH3 - m3plus * TSH1 + msto * TCO_1)
 
 #=================================================================================================================================================
 ## with VSHS_CL/OP and VSHP_CL/OP
 #first Layer
-dotT0 = 1.0/m * (V_PSOS * TSOS - V_PC_1 * TSH0 - (m0plus + V_PSOS - V_PC_1) * TSH0 + m0plus * TSH2) + alpha_iso
-#m0minus = m0plus + V_PSOS - V_PC_1 
+dotT0 = 1.0/m * (V_PSOS * TSOS - msto * TSH0 - (m0plus + V_PSOS - msto) * TSH0 + m0plus * TSH2) + alpha_iso
+#m0minus = m0plus + V_PSOS - msto 
 
 #second Layer
-dotT2 = 1.0/m * ( -V_PSOS * VSHP_OP * TSH2 + V_PC_1 * VSHS_OP * TCO_1 + (m0plus + V_PSOS - V_PC_1) * TSH0 - m0plus * TSH2  \
-    - (-V_PSOS * VSHP_OP + V_PSOS - V_PC_1 + V_PC_1 * VSHS_OP + m2plus) * TSH2 + m2plus * TSH3)
-#m2minus = -V_PSOS*VSHP_OP +V_PSOS -V_PC_1 +V_PC_1*VSHS_OP +m2plus
+dotT2 = 1.0/m * ( -V_PSOS * VSHP_OP * TSH2 + msto * VSHS_OP * TCO_1 + (m0plus + V_PSOS - msto) * TSH0 - m0plus * TSH2  \
+    - (-V_PSOS * VSHP_OP + V_PSOS - msto + msto * VSHS_OP + m2plus) * TSH2 + m2plus * TSH3)
+#m2minus = -V_PSOS*VSHP_OP +V_PSOS -msto +msto*VSHS_OP +m2plus
 
 #third Layer
-dotT3 = 1.0/m * ((-V_PSOS * VSHP_OP + V_PSOS - V_PC_1 + V_PC_1*VSHS_OP + m2plus) * TSH2 - m2plus * TSH3 \
-    - (-V_PSOS * VSHP_OP + V_PSOS - V_PC_1 + V_PC_1 * VSHS_OP  + m3plus) * TSH3 + m3plus * TSH1)
-#m3minus = -V_PSOS*VSHP_OP +V_PSOS -V_PC_1 +V_PC_1*VSHS_OP  +m3plus
+dotT3 = 1.0/m * ((-V_PSOS * VSHP_OP + V_PSOS - msto + msto*VSHS_OP + m2plus) * TSH2 - m2plus * TSH3 \
+    - (-V_PSOS * VSHP_OP + V_PSOS - msto + msto * VSHS_OP  + m3plus) * TSH3 + m3plus * TSH1)
+#m3minus = -V_PSOS*VSHP_OP +V_PSOS -msto +msto*VSHS_OP  +m3plus
 
 #fourth Layer
-dotT1 = 1.0/m * (-V_PSOS * VSHP_CL * TSH1 + (-V_PSOS * VSHP_OP + V_PSOS - V_PC_1 + V_PC_1 * VSHS_OP  + m3plus) * TSH3 \
-    - m3plus * TSH1 + V_PC_1 * VSHS_CL * TCO_1)
+dotT1 = 1.0/m * (-V_PSOS * VSHP_CL * TSH1 + (-V_PSOS * VSHP_OP + V_PSOS - msto + msto * VSHS_OP  + m3plus) * TSH3 \
+    - m3plus * TSH1 + msto * VSHS_CL * TCO_1)
 #=================================================================================================================================================
 
 
@@ -133,7 +133,7 @@ time_points = data["time"].values[int_start:]
 
 udata_0 = data["V_PSOS"][:-1].values[int_start:]
 
-udata_1 = data["V_PC_1"][:-1].values[int_start:]
+udata_1 = data["msto"][:-1].values[int_start:]
 
 udata_2 = data["m0minus"][:-1].values[int_start:]
 
@@ -205,10 +205,10 @@ pl.figure(figsize= (16,10))
 
 
 # pl.subplot(1, 1, 1)
-pl.scatter(time_points[::60], data["TSH0"].values[int_start::60], marker = "x", label = r"meas TSH0", color = "b")
-pl.scatter(time_points[::60], data["TSH2"].values[int_start::60], marker = "x", label = r"meas TSH2", color = "g")
-pl.scatter(time_points[::60], data["TSH3"].values[int_start::60], marker = "x", label = r"meas TSH3", color = "r")
-pl.scatter(time_points[::60], data["TSH1"].values[int_start::60], marker = "x", label = r"meas TSH1", color = "c")
+pl.scatter(time_points[::180], data["TSH0"].values[int_start::180], marker = "x", label = r"meas TSH0", color = "b")
+pl.scatter(time_points[::180], data["TSH2"].values[int_start::180], marker = "x", label = r"meas TSH2", color = "g")
+pl.scatter(time_points[::180], data["TSH3"].values[int_start::180], marker = "x", label = r"meas TSH3", color = "r")
+pl.scatter(time_points[::180], data["TSH1"].values[int_start::180], marker = "x", label = r"meas TSH1", color = "c")
 pl.plot(time_points, pl.squeeze(sim_est.simulation_results[0,:]), label = r"sim TSH0", color = "b")
 pl.plot(time_points, pl.squeeze(sim_est.simulation_results[1,:]), label = r"sim TSH2", color = "g")
 pl.plot(time_points, pl.squeeze(sim_est.simulation_results[2,:]), label = r"sim TSH3", color = "r")
@@ -216,7 +216,7 @@ pl.plot(time_points, pl.squeeze(sim_est.simulation_results[3,:]), label = r"sim 
 pl.title("storage model")
 pl.ylabel('temperature (C)')
 pl.xlabel('time (s)')
-pl.legend(loc = "upper right")
+pl.legend(loc = "upper left")
 pl.xlim([time_points[0], 86000])
 
 
