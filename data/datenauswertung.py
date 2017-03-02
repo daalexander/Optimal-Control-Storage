@@ -5,7 +5,7 @@ import numpy as np
 
 
 ########################
-date = "2017-02-23"
+date = "2017-02-04"
 start_time = "00:00:00"
 end_time = "23:59:59"
 ########################
@@ -63,7 +63,7 @@ data['TCI_1'] = data['TCI_1'] - 0.5
 
 # # alte csv
 # #=================================================================================================================================================
-# date = "20161001"
+# date = "20160930"
 # data = pd.read_table(date+'.csv', sep = ";") #index_col=0)
 # data = data[["Uhrzeit","TSH0","TSH1", "TSH2", "TSH3", "TSOS", "PSOS", "TSHSI", "VSHS_OP", "VSHS_CL", "VSHP_OP", "VSHP_CL", "PC_1", "CCH_1", "TCO_1", "TCI_1"]]
 # data = data.drop(data.index[0])
@@ -120,11 +120,14 @@ data['time'] = dt # datenbank
 
 data = data.astype(float)
 
+
+time_points = data["time"]
+
 # Plotten
-pl.figure(figsize= (16,10))
+pl.figure(figsize= (18,12))
 pl.subplot(2, 1, 1)
-pl.plot(data.index , data["PSOS"], label = "PSOS")
-pl.plot(data.index , data["PC_1"], label = "PC_1")
+pl.plot(time_points , data["PSOS"], label = "PSOS")
+pl.plot(time_points , data["PC_1"], label = "PC_1")
 
 # pl.plot(data.index , data["TSOS"], label = "TSOS")
 # pl.plot(data.index , data["TSH0"], label = "TSH0")
@@ -139,17 +142,18 @@ pl.plot(data.index , data["PC_1"], label = "PC_1")
 pl.xlabel('time (s)')
 pl.ylabel('massflow (kg/s)')
 pl.legend(loc = "upper left")
-
+pl.title("Scenario: " +  date , y=1.08)
 
 pl.subplot(2, 1, 2)
-pl.plot(data.index , data["TSH0"], label = "TSH0")
-pl.plot(data.index , data["TSH1"], label = "TSH1")
+pl.plot(time_points , data["TSH0"], label = "TSH0")
+pl.plot(time_points , data["TSH1"], label = "TSH1")
 
-pl.plot(data.index , data["TSH2"], label = "TSH2")
-pl.plot(data.index , data["TSH3"], label = "TSH3")
+pl.plot(time_points , data["TSH2"], label = "TSH2")
+pl.plot(time_points , data["TSH3"], label = "TSH3")
 pl.xlabel('time (s)')
-pl.ylabel('temperature (C)')
+pl.ylabel('temperature ($^{\circ}$C)')
 pl.legend(loc = "upper left")
+
 
 pl.savefig("/home/da/Master/Thesis/Optimal-Control-Storage/plots/"+ str(date) + "_pumpen.png")
 pl.show()
