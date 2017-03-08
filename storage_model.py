@@ -10,14 +10,27 @@ import casiopeia as cp
 import matplotlib.pyplot as plt
 
 #############################
-datatable = "data2017-02-23"
+datatable = "data2017-03-07"
 #############################
+# datatable = "data2017-01-19"
+# datatable = "data2017-02-22"
+# datatable = "data2017-02-27"
+# datatable = "data2017-02-23"
+# datatable = "data2017-03-07"
 
 
 # Constants
 
 cp_water = 4182.0
 layer = 4
+Tamb = 20.0
+alpha_0 = 2.88704#2.1134680556#1.58862###3.04966#1.65947#3.04966#1.93175#0.218024#
+alpha_2 = 2.03007#1.5473692778#2.32926###1.99152#1.24433#1.99152#2.38966#2.11546#
+alpha_3 = 1.30829#1.3780082778#1.05698###0.789104#2.45329#0.789104#1.07585#2.2112#
+alpha_1 = 7.24879#7.6578727778#12.43###8.87481#5.72889#8.87481#15.2428#3.38075#
+
+
+
 
 # States
 
@@ -82,22 +95,22 @@ m = 2000.0 / layer
 #=================================================================================================================================================
 ## with VSHS_CL/OP and VSHP_CL/OP
 #first Layer
-dotT0 = 1.0/m * (V_PSOS * TSOS - msto * TSH0 - (m0plus + V_PSOS - msto) * TSH0 + m0plus * TSH2) + alpha_iso
+dotT0 = 1.0/m * (V_PSOS * TSOS - msto * TSH0 - (m0plus + V_PSOS - msto) * TSH0 + m0plus * TSH2 - (alpha_0 * (TSH0 - Tamb)) / cp_water)  + alpha_iso
 #m0minus = m0plus + V_PSOS - msto 
 
 #second Layer
 dotT2 = 1.0/m * ( -V_PSOS * VSHP_OP * TSH2 + msto * VSHS_OP * TCO_1 + (m0plus + V_PSOS - msto) * TSH0 - m0plus * TSH2  \
-    - (-V_PSOS * VSHP_OP + V_PSOS - msto + msto * VSHS_OP + m2plus) * TSH2 + m2plus * TSH3)
+    - (-V_PSOS * VSHP_OP + V_PSOS - msto + msto * VSHS_OP + m2plus) * TSH2 + m2plus * TSH3 - (alpha_2 * (TSH2 - Tamb)) / cp_water)
 #m2minus = -V_PSOS*VSHP_OP +V_PSOS -msto +msto*VSHS_OP +m2plus
 
 #third Layer
 dotT3 = 1.0/m * ((-V_PSOS * VSHP_OP + V_PSOS - msto + msto*VSHS_OP + m2plus) * TSH2 - m2plus * TSH3 \
-    - (-V_PSOS * VSHP_OP + V_PSOS - msto + msto * VSHS_OP  + m3plus) * TSH3 + m3plus * TSH1)
+    - (-V_PSOS * VSHP_OP + V_PSOS - msto + msto * VSHS_OP  + m3plus) * TSH3 + m3plus * TSH1 - (alpha_3 * (TSH3 - Tamb)) / cp_water)
 #m3minus = -V_PSOS*VSHP_OP +V_PSOS -msto +msto*VSHS_OP  +m3plus
 
 #fourth Layer
 dotT1 = 1.0/m * (-V_PSOS * VSHP_CL * TSH1 + (-V_PSOS * VSHP_OP + V_PSOS - msto + msto * VSHS_OP  + m3plus) * TSH3 \
-    - m3plus * TSH1 + msto * VSHS_CL * TCO_1)
+    - m3plus * TSH1 + msto * VSHS_CL * TCO_1 - (alpha_1 * (TSH1 - Tamb)) / cp_water)
 #=================================================================================================================================================
 
 
@@ -124,6 +137,7 @@ int_start = 0
 #20161015 "Intervalle/20160303_Intervall7.csv"
 data = pd.read_table("data-ausgewertet/"+ datatable + ".csv", \
     delimiter=",", index_col=0)
+
 
 # for k,e in enumerate(int_start):
 
@@ -205,10 +219,10 @@ pl.figure(figsize= (16,10))
 
 
 # pl.subplot(1, 1, 1)
-pl.scatter(time_points[::180], data["TSH0"].values[int_start::180], marker = "x", label = r"meas TSH0", color = "b")
-pl.scatter(time_points[::180], data["TSH2"].values[int_start::180], marker = "x", label = r"meas TSH2", color = "g")
-pl.scatter(time_points[::180], data["TSH3"].values[int_start::180], marker = "x", label = r"meas TSH3", color = "r")
-pl.scatter(time_points[::180], data["TSH1"].values[int_start::180], marker = "x", label = r"meas TSH1", color = "c")
+pl.scatter(time_points[::500], data["TSH0"].values[int_start::500], marker = "x", label = r"meas TSH0", color = "b")
+pl.scatter(time_points[::500], data["TSH2"].values[int_start::500], marker = "x", label = r"meas TSH2", color = "g")
+pl.scatter(time_points[::500], data["TSH3"].values[int_start::500], marker = "x", label = r"meas TSH3", color = "r")
+pl.scatter(time_points[::500], data["TSH1"].values[int_start::500], marker = "x", label = r"meas TSH1", color = "c")
 pl.plot(time_points, pl.squeeze(sim_est.simulation_results[0,:]), label = r"sim TSH0", color = "b")
 pl.plot(time_points, pl.squeeze(sim_est.simulation_results[1,:]), label = r"sim TSH2", color = "g")
 pl.plot(time_points, pl.squeeze(sim_est.simulation_results[2,:]), label = r"sim TSH3", color = "r")
@@ -218,14 +232,14 @@ pl.ylabel('temperature (C)')
 pl.xlabel('time (s)')
 pl.legend(loc = "upper left")
 pl.xlim([time_points[0], 86000])
+pl.title("Scenario: " +  datatable , y=1.08)
 
 
-
-pl.savefig("/home/da/Master/Thesis/Optimal-Control-Storage/plots/" + str(datatable) + "_" \
+pl.savefig("/home/da/Master/Thesis/Optimal-Control-Storage/plots_pe/test_sim/" + str(datatable) + "_" \
    + "start_from_" + str(int_start) + "_" \
   #+ str(int_end)+\
    "storage.png", \
         bbox_inches='tight')
 
 
-pl.show()
+# pl.show()

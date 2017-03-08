@@ -5,7 +5,7 @@ import numpy as np
 
 
 ########################
-date = "2017-02-04"
+date = "2017-03-07"
 start_time = "00:00:00"
 end_time = "23:59:59"
 ########################
@@ -80,11 +80,9 @@ data['TCI_1'] = data['TCI_1'] - 0.5
 data["PSOS"] = pd.to_numeric(data["PSOS"])
 data["PC_1"] = pd.to_numeric(data["PC_1"])
 #
-# ungefaehre Umrechnung von Spannung auf Massenstrom
-# pri
-#data["PSOP"] = ( data["PSOP"] - 50.0 ) * ((48.0 - 28.5)/(100.0-50.0)) + 28.5
-# sel
-data["PSOS"] = map(lambda x: 0 if x == 0 else (( x - 50.0 ) * ((36.0 - 23.5)/(100.0-50.0)) + 23.5) / 60.0, data["PSOS"])
+## ungefaehre Umrechnung von Spannung auf Massenstrom
+# data["PSOS"] = map(lambda x: 0 if x == 0 else (( x - 50.0 ) * ((36.0 - 23.5)/(100.0-50.0)) + 23.5) / 60.0, data["PSOS"])
+data["PSOS"] = map(lambda x: 0 if x == 0 else (( x - 50.0 ) * ((30.0 - 18.3)/(100.0-50.0)) + 18.3) / 60.0, data["PSOS"])## korrekt Test30l
 # data["PC_1"] = map(lambda x: 0 if x == 0 else (( x - 50.0 ) * ((36.0 - 23.5)/(100.0-50.0)) + 23.5) / 60.0, data["PC_1"])
 # data["PC_1"] = map(lambda x: 0 if x == 0 else (( x - 50.0 ) * ((34.0 - 20.3)/(100.0-50.0)) + 20.3) / 60.0, data["PC_1"]) ## keine Beimischung
 data["PC_1"] = map(lambda x: 0 if x == 0 else (( x - 50.0 ) * ((30.0 - 18.3)/(100.0-50.0)) + 18.3) / 60.0, data["PC_1"]) ## volle Beimischung
