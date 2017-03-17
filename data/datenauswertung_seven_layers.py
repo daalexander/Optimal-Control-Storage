@@ -5,7 +5,7 @@ import numpy as np
 
 
 ########################
-date = "2017-03-12"
+date = "2017-03-03"
 start_time = "00:00:00"
 end_time = "23:59:59"
 ########################
@@ -98,6 +98,11 @@ data["PC_1"] = map(lambda x: 0 if x == 0 else (( x - 50.0 ) * ((30.0 - 18.3)/(10
 dt  = map(lambda x: (x-data["time"][0]).total_seconds(), data["time"]) #aus Datenbank
 data['time'] = dt # datenbank
 
+## Berechnung zwischenschichten
+data['TSH0_5'] = (data["TSH0"] + data["TSH2"]) / 2
+data['TSH2_5'] = (data["TSH2"] + data["TSH3"]) / 2
+data['TSH3_5'] = (data["TSH3"] + data["TSH1"]) / 2
+
 # Mittelwert von FlowSolarSek auf 36l/min
 #data["FlowSolarSek"] = map(lambda x: 35, data["FlowSolarSek"])
 
@@ -148,12 +153,16 @@ pl.plot(time_points , data["TSH1"], label = "TSH1")
 
 pl.plot(time_points , data["TSH2"], label = "TSH2")
 pl.plot(time_points , data["TSH3"], label = "TSH3")
+
+pl.plot(time_points , data["TSH0_5"], label = "TSH0_5")
+pl.plot(time_points , data["TSH2_5"], label = "TSH2_5")
+pl.plot(time_points , data["TSH3_5"], label = "TSH3_5")
 pl.xlabel('time (s)')
 pl.ylabel('temperature ($^{\circ}$C)')
 pl.legend(loc = "upper left")
 
 
-pl.savefig("/home/da/Master/Thesis/Optimal-Control-Storage/plots/"+ str(date) + "_pumpen.png")
+pl.savefig("/home/da/Master/Thesis/Optimal-Control-Storage/plots/"+ str(date) + "_7_layer_pumpen.png")
 pl.show()
 
 
@@ -215,6 +224,46 @@ data.loc[data['m3minus'] < 0.0000000000000000000000000001, 'm3minus'] = 0.0
 data['msto'] = data['PC_1'] * ((data['TCI_1'] - data['TCO_1']) / (data['TSH0'] - data ['TCO_1'])) 
 data.loc[data['msto'] < 0.0000000000000000000000000001, 'msto'] = 0.0 ## Negative Werter entfernen 
 
+# Plotten
+pl.figure(figsize= (18,12))
+pl.subplot(2, 1, 1)
+pl.plot(time_points , data["PSOS"], label = "PSOS")
+pl.plot(time_points , data["msto"], label = "msto")
+
+# pl.plot(data.index , data["TSOS"], label = "TSOS")
+# pl.plot(data.index , data["TSH0"], label = "TSH0")
+# pl.plot(data.index , data["TSH1"], label = "TSH1")
+
+# pl.plot(data.index , data["TSH2"], label = "TSH2")
+# pl.plot(data.index , data["TSH3"], label = "TSH3")
+
+# pl.plot(data.index , data["TCO_1"], label = "TCO_1")
+
+# pl.plot(data.index , data["TSHSI"], label = "TSHSI")
+pl.xlabel('time (s)')
+pl.ylabel('massflow (kg/s)')
+pl.legend(loc = "upper left")
+pl.title("Scenario: " +  date , y=1.08)
+
+pl.subplot(2, 1, 2)
+pl.plot(time_points , data["TSH0"], label = "TSH0")
+pl.plot(time_points , data["TSH1"], label = "TSH1")
+
+pl.plot(time_points , data["TSH2"], label = "TSH2")
+pl.plot(time_points , data["TSH3"], label = "TSH3")
+
+pl.plot(time_points , data["TSH0_5"], label = "TSH0_5")
+pl.plot(time_points , data["TSH2_5"], label = "TSH2_5")
+pl.plot(time_points , data["TSH3_5"], label = "TSH3_5")
+pl.xlabel('time (s)')
+pl.ylabel('temperature ($^{\circ}$C)')
+pl.legend(loc = "upper left")
+
+
+pl.savefig("/home/da/Master/Thesis/Optimal-Control-Storage/plots/"+ str(date) + "_7_layer_pumpen.png")
+pl.show()
+
+
 data.rename(columns={'PSOS': 'V_PSOS'}, inplace=True)
 data.rename(columns={'PC_1': 'V_PC_1'}, inplace=True)
 
@@ -222,7 +271,7 @@ data.rename(columns={'PC_1': 'V_PC_1'}, inplace=True)
 print data.head()
 
 
-data.to_csv('/home/da/Master/Thesis/Optimal-Control-Storage/data-ausgewertet/' + 'data' + str(date) + '.csv')
+data.to_csv('/home/da/Master/Thesis/Optimal-Control-Storage/data-ausgewertet/7_layer/' + 'data' + str(date) + '.csv')
 
 
 
