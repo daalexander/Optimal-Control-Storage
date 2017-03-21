@@ -121,11 +121,71 @@ data = data.astype(float)
 
 time_points = data["time"]
 
+
+
+### calculate massflows from the layers
+
+# Calculate m0
+data_m0 = data['PSOS'] - data['msto'] 
+
+# data['m0'] = data['PSOS'] - data['PC_1'] 
+# data_m0 = data['m0']
+
+# separate if m0minus or m0plus
+data['m0plus'] = data_m0[(data_m0 <= 0.0)]
+data['m0minus'] = data_m0[(data_m0 >= 0.0)]
+
+# Fill NaN with 0
+data['m0minus'].fillna(0, inplace = True )
+data['m0plus'].fillna(0, inplace = True )
+
+# Change negative massflow from m0plus into positive
+data['m0plus'] = data['m0plus'] * (-1)
+# data['m0plus'].replace( -0.0 , 0.0)
+# data['m0plus'] = data['m0plus'].clip(lower=0.0000000000000000000000000000000001)
+data.loc[data['m0plus'] < 0.0000000000000000000000000001, 'm0plus'] = 0.0
+
+
+# Calculate m2
+data_m2 = - data['m0plus'] + data['m0minus'] - data['PSOS']*data['VSHP_OP'] + data['msto']*data['VSHS_OP'] 
+
+# separate if m2minus or m2plus
+data['m2plus'] = data_m2[(data_m2 <= 0.0)]
+data['m2minus'] = data_m2[(data_m2 >= 0.0)]
+
+# Fill NaN with 0
+data['m2minus'].fillna(0, inplace = True )
+data['m2plus'].fillna(0, inplace = True )
+
+# Change negative massflow from m2plus into positive
+data['m2plus'] = data['m2plus'] * (-1)
+data.loc[data['m2plus'] < 0.0000000000000000000000000001, 'm2plus'] = 0.0
+
+
+# Calculate m3
+data_m3 =  - data['PSOS']*data['VSHP_CL'] + data['msto']*data['VSHS_CL']
+
+# separate if m3minus or m3plus
+data['m3plus'] = data_m3[(data_m3 >= 0.0)]
+data['m3minus'] = data_m3[(data_m3 <= 0.0)]
+
+# Fill NaN with 0
+data['m3minus'].fillna(0, inplace = True )
+data['m3plus'].fillna(0, inplace = True )
+
+# Change negative massflow from m3plus into positive
+data['m3minus'] = data['m3minus'] * (-1)
+data.loc[data['m3minus'] < 0.0000000000000000000000000001, 'm3minus'] = 0.0
+
+## Mischverhaeltniss entnahme Speicher
+data['msto'] = data['PC_1'] * ((data['TCI_1'] - data['TCO_1']) / (data['TSH0'] - data ['TCO_1'])) 
+data.loc[data['msto'] < 0.0000000000000000000000000001, 'msto'] = 0.0 ## Negative Werter entfernen 
+
 # Plotten
 pl.figure(figsize= (18,12))
 pl.subplot(2, 1, 1)
 pl.plot(time_points , data["PSOS"], label = "PSOS")
-pl.plot(time_points , data["PC_1"], label = "PC_1")
+pl.plot(time_points , data["msto"], label = "msto")
 
 # pl.plot(data.index , data["TSOS"], label = "TSOS")
 # pl.plot(data.index , data["TSH0"], label = "TSH0")
@@ -156,64 +216,6 @@ pl.legend(loc = "upper left")
 pl.savefig("/home/da/Master/Thesis/Optimal-Control-Storage/plots/"+ str(date) + "_pumpen.png")
 pl.show()
 
-
-### calculate massflows from the layers
-
-# Calculate m0
-data_m0 = data['PSOS'] - data['PC_1'] 
-
-# data['m0'] = data['PSOS'] - data['PC_1'] 
-# data_m0 = data['m0']
-
-# separate if m0minus or m0plus
-data['m0plus'] = data_m0[(data_m0 <= 0.0)]
-data['m0minus'] = data_m0[(data_m0 >= 0.0)]
-
-# Fill NaN with 0
-data['m0minus'].fillna(0, inplace = True )
-data['m0plus'].fillna(0, inplace = True )
-
-# Change negative massflow from m0plus into positive
-data['m0plus'] = data['m0plus'] * (-1)
-# data['m0plus'].replace( -0.0 , 0.0)
-# data['m0plus'] = data['m0plus'].clip(lower=0.0000000000000000000000000000000001)
-data.loc[data['m0plus'] < 0.0000000000000000000000000001, 'm0plus'] = 0.0
-
-
-# Calculate m2
-data_m2 = - data['m0plus'] + data['m0minus'] - data['PSOS']*data['VSHP_OP'] + data['PC_1']*data['VSHS_OP'] 
-
-# separate if m2minus or m2plus
-data['m2plus'] = data_m2[(data_m2 <= 0.0)]
-data['m2minus'] = data_m2[(data_m2 >= 0.0)]
-
-# Fill NaN with 0
-data['m2minus'].fillna(0, inplace = True )
-data['m2plus'].fillna(0, inplace = True )
-
-# Change negative massflow from m2plus into positive
-data['m2plus'] = data['m2plus'] * (-1)
-data.loc[data['m2plus'] < 0.0000000000000000000000000001, 'm2plus'] = 0.0
-
-
-# Calculate m3
-data_m3 =  - data['PSOS']*data['VSHP_CL'] + data['PC_1']*data['VSHS_CL']
-
-# separate if m3minus or m3plus
-data['m3plus'] = data_m3[(data_m3 >= 0.0)]
-data['m3minus'] = data_m3[(data_m3 <= 0.0)]
-
-# Fill NaN with 0
-data['m3minus'].fillna(0, inplace = True )
-data['m3plus'].fillna(0, inplace = True )
-
-# Change negative massflow from m3plus into positive
-data['m3minus'] = data['m3minus'] * (-1)
-data.loc[data['m3minus'] < 0.0000000000000000000000000001, 'm3minus'] = 0.0
-
-## Mischverhaeltniss entnahme Speicher
-data['msto'] = data['PC_1'] * ((data['TCI_1'] - data['TCO_1']) / (data['TSH0'] - data ['TCO_1'])) 
-data.loc[data['msto'] < 0.0000000000000000000000000001, 'msto'] = 0.0 ## Negative Werter entfernen 
 
 data.rename(columns={'PSOS': 'V_PSOS'}, inplace=True)
 data.rename(columns={'PC_1': 'V_PC_1'}, inplace=True)

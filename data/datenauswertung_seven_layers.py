@@ -5,7 +5,7 @@ import numpy as np
 
 
 ########################
-date = "2017-03-03"
+date = "2017-03-18"
 start_time = "00:00:00"
 end_time = "23:59:59"
 ########################
@@ -126,50 +126,14 @@ data = data.astype(float)
 
 time_points = data["time"]
 
-# Plotten
-pl.figure(figsize= (18,12))
-pl.subplot(2, 1, 1)
-pl.plot(time_points , data["PSOS"], label = "PSOS")
-pl.plot(time_points , data["PC_1"], label = "PC_1")
-
-# pl.plot(data.index , data["TSOS"], label = "TSOS")
-# pl.plot(data.index , data["TSH0"], label = "TSH0")
-# pl.plot(data.index , data["TSH1"], label = "TSH1")
-
-# pl.plot(data.index , data["TSH2"], label = "TSH2")
-# pl.plot(data.index , data["TSH3"], label = "TSH3")
-
-# pl.plot(data.index , data["TCO_1"], label = "TCO_1")
-
-# pl.plot(data.index , data["TSHSI"], label = "TSHSI")
-pl.xlabel('time (s)')
-pl.ylabel('massflow (kg/s)')
-pl.legend(loc = "upper left")
-pl.title("Scenario: " +  date , y=1.08)
-
-pl.subplot(2, 1, 2)
-pl.plot(time_points , data["TSH0"], label = "TSH0")
-pl.plot(time_points , data["TSH1"], label = "TSH1")
-
-pl.plot(time_points , data["TSH2"], label = "TSH2")
-pl.plot(time_points , data["TSH3"], label = "TSH3")
-
-pl.plot(time_points , data["TSH0_5"], label = "TSH0_5")
-pl.plot(time_points , data["TSH2_5"], label = "TSH2_5")
-pl.plot(time_points , data["TSH3_5"], label = "TSH3_5")
-pl.xlabel('time (s)')
-pl.ylabel('temperature ($^{\circ}$C)')
-pl.legend(loc = "upper left")
-
-
-pl.savefig("/home/da/Master/Thesis/Optimal-Control-Storage/plots/"+ str(date) + "_7_layer_pumpen.png")
-pl.show()
-
+## Mischverhaeltniss entnahme Speicher
+data['msto'] = data['PC_1'] * ((data['TCI_1'] - data['TCO_1']) / (data['TSH0'] - data ['TCO_1'])) 
+data.loc[data['msto'] < 0.0000000000000000000000000001, 'msto'] = 0.0 ## Negative Werter entfernen 
 
 ### calculate massflows from the layers
 
 # Calculate m0
-data_m0 = data['PSOS'] - data['PC_1'] 
+data_m0 = data['PSOS'] - data['msto'] 
 
 # data['m0'] = data['PSOS'] - data['PC_1'] 
 # data_m0 = data['m0']
@@ -190,7 +154,7 @@ data.loc[data['m0plus'] < 0.0000000000000000000000000001, 'm0plus'] = 0.0
 
 
 # Calculate m2
-data_m2 = - data['m0plus'] + data['m0minus'] - data['PSOS']*data['VSHP_OP'] + data['PC_1']*data['VSHS_OP'] 
+data_m2 = - data['m0plus'] + data['m0minus'] - data['PSOS']*data['VSHP_OP'] + data['msto']*data['VSHS_OP'] 
 
 # separate if m2minus or m2plus
 data['m2plus'] = data_m2[(data_m2 <= 0.0)]
@@ -206,7 +170,7 @@ data.loc[data['m2plus'] < 0.0000000000000000000000000001, 'm2plus'] = 0.0
 
 
 # Calculate m3
-data_m3 =  - data['PSOS']*data['VSHP_CL'] + data['PC_1']*data['VSHS_CL']
+data_m3 =  - data['PSOS']*data['VSHP_CL'] + data['msto']*data['VSHS_CL']
 
 # separate if m3minus or m3plus
 data['m3plus'] = data_m3[(data_m3 >= 0.0)]
@@ -220,9 +184,6 @@ data['m3plus'].fillna(0, inplace = True )
 data['m3minus'] = data['m3minus'] * (-1)
 data.loc[data['m3minus'] < 0.0000000000000000000000000001, 'm3minus'] = 0.0
 
-## Mischverhaeltniss entnahme Speicher
-data['msto'] = data['PC_1'] * ((data['TCI_1'] - data['TCO_1']) / (data['TSH0'] - data ['TCO_1'])) 
-data.loc[data['msto'] < 0.0000000000000000000000000001, 'msto'] = 0.0 ## Negative Werter entfernen 
 
 # Plotten
 pl.figure(figsize= (18,12))
@@ -262,7 +223,6 @@ pl.legend(loc = "upper left")
 
 pl.savefig("/home/da/Master/Thesis/Optimal-Control-Storage/plots/"+ str(date) + "_7_layer_pumpen.png")
 pl.show()
-
 
 data.rename(columns={'PSOS': 'V_PSOS'}, inplace=True)
 data.rename(columns={'PC_1': 'V_PC_1'}, inplace=True)

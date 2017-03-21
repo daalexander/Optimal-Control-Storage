@@ -10,7 +10,7 @@ import casiopeia as cp
 import matplotlib.pyplot as plt
 
 #############################
-datatable = "data2017-01-19"
+datatable = "data2017-03-10"
 #############################
 # datatable = "data2017-01-19"
 # datatable = "data2017-02-22"
@@ -100,16 +100,16 @@ dotT2_5 = 1.0/m * ((-V_PSOS*VSHP_OP +V_PSOS -msto +msto*VSHS_OP +m2plus) * TSH2 
 
 #third Layer
 dotT3 = 1.0/m * ((-V_PSOS * VSHP_OP + V_PSOS - msto + msto*VSHS_OP + m2plus) * TSH2_5 - m2plus * TSH3 \
-    - (-V_PSOS * VSHP_OP + V_PSOS - msto + msto * VSHS_OP  + m3plus) * TSH3 + m3plus * TSH3_5 - (alpha_3 * (TSH3 - Tamb)) / cp_water)
-#m3minus = (-V_PSOS*VSHP_OP +V_PSOS -msto +msto*VSHS_OP  +m3plus)
+    - (-V_PSOS * VSHP_OP + V_PSOS - msto + msto * VSHS_OP  + m2plus) * TSH3 + m2plus * TSH3_5 - (alpha_3 * (TSH3 - Tamb)) / cp_water)
+#m3minus = (-V_PSOS*VSHP_OP +V_PSOS -msto +msto*VSHS_OP  +m3plus)## m3minus ist m2minus und m3plus ist m2plus
 
 #leyer3.5
-dotT3_5 = 1.0/m * ((-V_PSOS*VSHP_OP +V_PSOS -msto +msto*VSHS_OP  +m3plus) * TSH3 - m3plus * TSH3_5 \
-    - (-V_PSOS*VSHP_OP +V_PSOS -msto +msto*VSHS_OP  +m3plus) * TSH3_5 + m3plus * TSH1 - (alpha_3_5 * (TSH3_5 - Tamb)) / cp_water)
+dotT3_5 = 1.0/m * ((-V_PSOS*VSHP_OP +V_PSOS -msto +msto*VSHS_OP  +m2plus) * TSH3 - m2plus * TSH3_5 \
+    - (-V_PSOS*VSHP_OP +V_PSOS -msto +msto*VSHS_OP  +m2plus) * TSH3_5 + m2plus * TSH1 - (alpha_3_5 * (TSH3_5 - Tamb)) / cp_water)
 
 #fourth Layer
-dotT1 = 1.0/m * (-V_PSOS * VSHP_CL * TSH1 + (-V_PSOS * VSHP_OP + V_PSOS - msto + msto * VSHS_OP  + m3plus) * TSH3_5 \
-    - m3plus * TSH1 + msto * VSHS_CL * TCO_1 - (alpha_1 * (TSH1 - Tamb)) / cp_water)
+dotT1 = 1.0/m * (-V_PSOS * VSHP_CL * TSH1 + (-V_PSOS * VSHP_OP + V_PSOS - msto + msto * VSHS_OP  + m2plus) * TSH3_5 \
+    - m2plus * TSH1 + msto * VSHS_CL * TCO_1 - (alpha_1 * (TSH1 - Tamb)) / cp_water)
 #=================================================================================================================================================
 
 
@@ -243,11 +243,12 @@ pl.title("storage model")
 pl.ylabel('temperature (C)')
 pl.xlabel('time (s)')
 pl.legend(loc = "upper left")
+# pl.legend(loc = "upper right")
 pl.xlim([time_points[0], 86000])
 pl.title("Scenario: " +  datatable , y=1.08)
 
 
-pl.savefig("/home/da/Master/Thesis/Optimal-Control-Storage/plots_pe/7_schichten/" + str(datatable) + "_" \
+pl.savefig("/home/da/Master/Thesis/Optimal-Control-Storage/plots_pe/m2_anpassung/" + str(datatable) + "_" \
    + "start_from_" + str(int_start) + "_" \
   #+ str(int_end)+\
    "storage.png", \
