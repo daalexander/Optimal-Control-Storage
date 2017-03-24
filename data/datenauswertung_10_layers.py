@@ -5,7 +5,7 @@ import numpy as np
 
 
 ########################
-date = "2017-03-22"
+date = "2017-02-07"
 start_time = "00:00:00"
 end_time = "23:59:59"
 ########################
@@ -99,9 +99,12 @@ dt  = map(lambda x: (x-data["time"][0]).total_seconds(), data["time"]) #aus Date
 data['time'] = dt # datenbank
 
 ## Berechnung zwischenschichten
-data['TSH0_5'] = (data["TSH0"] + data["TSH2"]) / 2
-data['TSH2_5'] = (data["TSH2"] + data["TSH3"]) / 2
-data['TSH3_5'] = (data["TSH3"] + data["TSH1"]) / 2
+data['TSH0_1'] = data["TSH0"] - 1.0 * ((data["TSH0"] - data["TSH2"]) / 3) 
+data['TSH0_2'] = data["TSH0"] - 2.0 * ((data["TSH0"] - data["TSH2"]) / 3)  
+data['TSH2_1'] = data["TSH2"] - 1.0 * ((data["TSH2"] - data["TSH3"]) / 3) 
+data['TSH2_2'] = data["TSH2"] - 2.0 * ((data["TSH2"] - data["TSH3"]) / 3) 
+data['TSH3_1'] = data["TSH3"] - 1.0 * ((data["TSH3"] - data["TSH1"]) / 3) 
+data['TSH3_2'] = data["TSH3"] - 2.0 * ((data["TSH3"] - data["TSH1"]) / 3) 
 
 # Mittelwert von FlowSolarSek auf 36l/min
 #data["FlowSolarSek"] = map(lambda x: 35, data["FlowSolarSek"])
@@ -213,15 +216,18 @@ pl.plot(time_points , data["TSH1"], label = "TSH1")
 pl.plot(time_points , data["TSH2"], label = "TSH2")
 pl.plot(time_points , data["TSH3"], label = "TSH3")
 
-pl.plot(time_points , data["TSH0_5"], label = "TSH0_5")
-pl.plot(time_points , data["TSH2_5"], label = "TSH2_5")
-pl.plot(time_points , data["TSH3_5"], label = "TSH3_5")
+# pl.plot(time_points , data["TSH0_1"], label = "TSH0_1")
+# pl.plot(time_points , data["TSH0_2"], label = "TSH0_2")
+# pl.plot(time_points , data["TSH2_1"], label = "TSH2_1")
+# pl.plot(time_points , data["TSH2_2"], label = "TSH2_2")
+# pl.plot(time_points , data["TSH3_1"], label = "TSH3_1")
+# pl.plot(time_points , data["TSH3_2"], label = "TSH3_2")
 pl.xlabel('time (s)')
 pl.ylabel('temperature ($^{\circ}$C)')
 pl.legend(loc = "upper left")
 
 
-pl.savefig("/home/da/Master/Thesis/Optimal-Control-Storage/plots/"+ str(date) + "_7_layer_pumpen.png")
+pl.savefig("/home/da/Master/Thesis/Optimal-Control-Storage/plots/"+ str(date) + "_10_layer_pumpen.png")
 pl.show()
 
 data.rename(columns={'PSOS': 'V_PSOS'}, inplace=True)
@@ -231,7 +237,7 @@ data.rename(columns={'PC_1': 'V_PC_1'}, inplace=True)
 print data.head()
 
 
-data.to_csv('/home/da/Master/Thesis/Optimal-Control-Storage/data-ausgewertet/7_layer/' + 'data' + str(date) + '.csv')
+data.to_csv('/home/da/Master/Thesis/Optimal-Control-Storage/data-ausgewertet/10_layer/' + 'data' + str(date) + '.csv')
 
 
 
