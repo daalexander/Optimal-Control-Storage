@@ -5,7 +5,7 @@ import numpy as np
 
 
 ########################
-date = "2017-02-07"
+date = "2017-03-28"
 start_time = "00:00:00"
 end_time = "23:59:59"
 ########################
@@ -14,18 +14,51 @@ end_time = "23:59:59"
 connection_string = "postgresql+psycopg2://stcs_student:stcs_student@w-stcs-services:5432/stcs"
 # connection_string = "postgresql+psycopg2://stcs_student:stcs_student@w-stcs-services.hs-karlsruhe.de:5432/stcs"
 
-## Zeitpunkt muss hier angepasst werden
+## mit rolling_median
+# query = """
+# SELECT timestamp,tsh0,tsh1,tsh2,tsh3,tsos,psos,tshsi,vshs_op,vshs_cl,vshp_op,vshp_cl,pc_1,cch_1,tco_1,tci_1
+# FROM stcs.public.chillii_rolling_median
+# WHERE timestamp > '""" + date + " " + start_time + \
+# """' AND timestamp < '""" + date + " " + end_time + \
+# """' ORDER BY timestamp
+# """
+
+
+##===========================================================================================================
+##ohne rolling_median
 query = """
 SELECT timestamp,tsh0,tsh1,tsh2,tsh3,tsos,psos,tshsi,vshs_op,vshs_cl,vshp_op,vshp_cl,pc_1,cch_1,tco_1,tci_1
-FROM stcs.public.chillii_rolling_median
+FROM stcs.public.chillii
 WHERE timestamp > '""" + date + " " + start_time + \
 """' AND timestamp < '""" + date + " " + end_time + \
 """' ORDER BY timestamp
 """
+##===========================================================================================================
+
 
 data = pd.read_sql_query(query, con=connection_string)
 
-# ## aktuelle csv
+
+##===========================================================================================================
+#messfehler durch median glaetten
+data["tsh0"] = pd.rolling_median(data["tsh0"], window=5, center=True).fillna(method='bfill').fillna(method='ffill')
+data["tsh1"] = pd.rolling_median(data["tsh1"], window=5, center=True).fillna(method='bfill').fillna(method='ffill')
+data["tsh2"] = pd.rolling_median(data["tsh2"], window=5, center=True).fillna(method='bfill').fillna(method='ffill')
+data["tsh3"] = pd.rolling_median(data["tsh3"], window=5, center=True).fillna(method='bfill').fillna(method='ffill')
+data["tsos"] = pd.rolling_median(data["tsos"], window=5, center=True).fillna(method='bfill').fillna(method='ffill')
+data["psos"] = pd.rolling_median(data["psos"], window=5, center=True).fillna(method='bfill').fillna(method='ffill')
+data["tshsi"] = pd.rolling_median(data["tshsi"], window=5, center=True).fillna(method='bfill').fillna(method='ffill')
+data["vshs_op"] = pd.rolling_median(data["vshs_op"], window=5, center=True).fillna(method='bfill').fillna(method='ffill')
+data["vshs_cl"] = pd.rolling_median(data["vshs_cl"], window=5, center=True).fillna(method='bfill').fillna(method='ffill')
+data["vshp_op"] = pd.rolling_median(data["vshp_op"], window=5, center=True).fillna(method='bfill').fillna(method='ffill')
+data["vshp_cl"] = pd.rolling_median(data["vshp_cl"], window=5, center=True).fillna(method='bfill').fillna(method='ffill')
+data["pc_1"] = pd.rolling_median(data["pc_1"], window=5, center=True).fillna(method='bfill').fillna(method='ffill')
+data["cch_1"] = pd.rolling_median(data["cch_1"], window=5, center=True).fillna(method='bfill').fillna(method='ffill')
+data["tco_1"] = pd.rolling_median(data["tco_1"], window=5, center=True).fillna(method='bfill').fillna(method='ffill')
+data["tci_1"] = pd.rolling_median(data["tci_1"], window=5, center=True).fillna(method='bfill').fillna(method='ffill')
+##===========================================================================================================
+
+# ## csv
 # nametable = "20170223"
 # data = pd.read_table(nametable+'.csv', sep = ",") #index_col=0)
 # data = data[["timestamp","tsh0","tsh1", "tsh2", "tsh3", "tsos", "psos", "tshsi", "vshs_op", "vshs_cl", "vshp_op", "vshp_cl", "pc_1", "cch_1", "tco_1"]]
@@ -228,7 +261,7 @@ pl.legend(loc = "upper left")
 
 
 pl.savefig("/home/da/Master/Thesis/Optimal-Control-Storage/plots/"+ str(date) + "_10_layer_pumpen.png")
-pl.show()
+# pl.show()
 
 data.rename(columns={'PSOS': 'V_PSOS'}, inplace=True)
 data.rename(columns={'PC_1': 'V_PC_1'}, inplace=True)

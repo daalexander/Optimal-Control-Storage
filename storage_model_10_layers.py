@@ -10,7 +10,7 @@ import casiopeia as cp
 import matplotlib.pyplot as plt
 
 #############################
-datatable = "data2017-02-07"
+datatable = "data2017-03-28"
 #############################
 # datatable = "data2017-01-19"
 # datatable = "data2017-02-22"
@@ -24,16 +24,28 @@ datatable = "data2017-02-07"
 cp_water = 4182.0
 layer = 10.0
 Tamb = 20.0
-alpha_0 = 1.15482 
-alpha_2 = 0.812026
-alpha_3 = 0.523315
-alpha_1 = 2.89951
-alpha_0_1 = 0.827681
-alpha_0_2 = 1.02636
-alpha_2_1 = 1.19537
-alpha_2_2 = 1.0
-alpha_3_1 = 1.0
-alpha_3_2 = 1.0
+Tfloor = 18.0
+layer_surface = 0.9503 
+storage_height = 2.38
+storage_scope = 3.4558
+floor_surface = 0.9503
+storage_top_surface = 0.9503
+alpha_water = 475.0
+alpha_sto = 
+alpha_floor = 
+
+storage_surface = (storage_scope * (storage_height / layer) )
+
+# alpha_0 = 1.15482 
+# alpha_2 = 0.812026
+# alpha_3 = 0.523315
+# alpha_1 = 2.89951
+# alpha_0_1 = 0.827681
+# alpha_0_2 = 1.02636
+# alpha_2_1 = 1.19537
+# alpha_2_2 = 1.0
+# alpha_3_1 = 1.0
+# alpha_3_2 = 1.0
 
 
 
@@ -88,46 +100,73 @@ m = 2000.0 / layer
 
 #=================================================================================================================================================
 #first Layer
-dotT0 = 1.0/m * (V_PSOS * TSOS - msto * TSH0 - (m0plus + V_PSOS - msto) * TSH0 + m0plus * TSH0_1 - (alpha_0 * (TSH0 - Tamb)) / cp_water) + alpha_iso
+dotT0 = 1.0/m * (V_PSOS * TSOS - msto * TSH0 - (m0plus + V_PSOS - msto) * TSH0 + m0plus * TSH0_1 \
+    - (alpha_sto * (storage_surface + storage_top_surface) * (TSH0 - Tamb)) / cp_water \
+    - (alpha_water * layer_surface * (TSH0 - TSH0_1)) /cp_water) + alpha_iso
 #m0minus = (m0plus + V_PSOS - msto) 
 
 #layer1.1
 dotT0_1 = 1.0/m * ((m0plus + V_PSOS - msto) * TSH0 - m0plus * TSH0_1 - (m0plus + V_PSOS - msto) * TSH0_1 + m0plus * TSH0_2 \
-    - (alpha_0_1 * (TSH0_1 - Tamb)) / cp_water)
+    - (alpha_sto * storage_surface * (TSH0_1 - Tamb)) / cp_water \
+    + (alpha_water * layer_surface * (TSH0 - TSH0_1)) /cp_water \
+    - (alpha_water * layer_surface * (TSH0_1 - TSH0_2)) /cp_water)
 
 #layer1.2
 dotT0_2 = 1.0/m * ((m0plus + V_PSOS - msto) * TSH0_1 - m0plus * TSH0_2 - (m0plus + V_PSOS - msto) * TSH0_2 + m0plus * TSH2 \
-    - (alpha_0_2 * (TSH0_2 - Tamb)) / cp_water)
+    - (alpha_sto * storage_surface * (TSH0_2 - Tamb)) / cp_water \
+    + (alpha_water * layer_surface * (TSH0_1 - TSH0_2)) /cp_water \
+    - (alpha_water * layer_surface * (TSH0_2 - TSH2)) /cp_water) 
 
 #second Layer
 dotT2 = 1.0/m * ( -V_PSOS * VSHP_OP * TSH2 + msto * VSHS_OP * TCO_1 + (m0plus + V_PSOS - msto) * TSH0_2 - m0plus * TSH2  \
-    - (-V_PSOS * VSHP_OP + V_PSOS - msto + msto * VSHS_OP + m2plus) * TSH2 + m2plus * TSH2_1 - (alpha_2 * (TSH2 - Tamb)) / cp_water)
+    - (-V_PSOS * VSHP_OP + V_PSOS - msto + msto * VSHS_OP + m2plus) * TSH2 + m2plus * TSH2_1 \
+    - (alpha_sto * storage_surface * (TSH2 - Tamb)) / cp_water \
+    + (alpha_water * layer_surface * (TSH0_2 - TSH2)) /cp_water \
+    - (alpha_water * layer_surface * (TSH2 - TSH2_1)) /cp_water)
 #m2minus = (-V_PSOS*VSHP_OP +V_PSOS -msto +msto*VSHS_OP +m2plus)
 
 #layer2.1
 dotT2_1 = 1.0/m * ((-V_PSOS*VSHP_OP +V_PSOS -msto +msto*VSHS_OP +m2plus) * TSH2 - m2plus * TSH2_1 - \
-    (-V_PSOS*VSHP_OP +V_PSOS -msto +msto*VSHS_OP +m2plus) * TSH2_1 + m2plus * TSH2_2 - alpha_2_1 * (TSH2_1 - Tamb) / cp_water)
+    (-V_PSOS*VSHP_OP +V_PSOS -msto +msto*VSHS_OP +m2plus) * TSH2_1 + m2plus * TSH2_2 \
+    - (alpha_sto * storage_surface * (TSH2_1 - Tamb)) / cp_water \
+    + (alpha_water * layer_surface * (TSH2 - TSH2_1)) /cp_water \
+    - (alpha_water * layer_surface * (TSH2_1 - TSH2_2)) /cp_water)
 
 #layer2.2
 dotT2_2 = 1.0/m * ((-V_PSOS*VSHP_OP +V_PSOS -msto +msto*VSHS_OP +m2plus) * TSH2_1 - m2plus * TSH2_2 - \
-    (-V_PSOS*VSHP_OP +V_PSOS -msto +msto*VSHS_OP +m2plus) * TSH2_2 + m2plus * TSH3 - alpha_2_2 * (TSH2_2 - Tamb) / cp_water)
+    (-V_PSOS*VSHP_OP +V_PSOS -msto +msto*VSHS_OP +m2plus) * TSH2_2 + m2plus * TSH3 \
+    - (alpha_sto * storage_surface * (TSH2_2 - Tamb)) / cp_water \
+    + (alpha_water * layer_surface * (TSH2_1 - TSH2_2)) /cp_water \
+    - (alpha_water * layer_surface * (TSH2_2 - TSH3)) /cp_water)
 
 #third Layer
 dotT3 = 1.0/m * ((-V_PSOS * VSHP_OP + V_PSOS - msto + msto*VSHS_OP + m2plus) * TSH2_2 - m2plus * TSH3 \
-    - (-V_PSOS * VSHP_OP + V_PSOS - msto + msto * VSHS_OP  + m2plus) * TSH3 + m2plus * TSH3_1 - (alpha_3 * (TSH3 - Tamb)) / cp_water)
+    - (-V_PSOS * VSHP_OP + V_PSOS - msto + msto * VSHS_OP  + m2plus) * TSH3 + m2plus * TSH3_1 \
+    - (alpha_sto * storage_surface * (TSH3 - Tamb)) / cp_water \
+    + (alpha_water * layer_surface * (TSH2_2 - TSH3)) /cp_water \
+    - (alpha_water * layer_surface * (TSH3 - TSH3_1)) /cp_water)
 #m3minus = (-V_PSOS*VSHP_OP +V_PSOS -msto +msto*VSHS_OP  +m3plus)## m3minus ist m2minus und m3plus ist m2plus
 
 #leyer3.1
 dotT3_1 = 1.0/m * ((-V_PSOS*VSHP_OP +V_PSOS -msto +msto*VSHS_OP  +m2plus) * TSH3 - m2plus * TSH3_1 \
-    - (-V_PSOS*VSHP_OP +V_PSOS -msto +msto*VSHS_OP  +m2plus) * TSH3_1 + m2plus * TSH3_2 - (alpha_3_1 * (TSH3_1 - Tamb)) / cp_water)
+    - (-V_PSOS*VSHP_OP +V_PSOS -msto +msto*VSHS_OP  +m2plus) * TSH3_1 + m2plus * TSH3_2 \
+    - (alpha_sto * storage_surface * (TSH3_1 - Tamb)) / cp_water \
+    + (alpha_water * layer_surface * (TSH3 - TSH3_1)) /cp_water \
+    - (alpha_water * layer_surface * (TSH3_1 - TSH3_2)) /cp_water)
 
 #leyer3.2
 dotT3_2 = 1.0/m * ((-V_PSOS*VSHP_OP +V_PSOS -msto +msto*VSHS_OP  +m2plus) * TSH3_1 - m2plus * TSH3_2 \
-    - (-V_PSOS*VSHP_OP +V_PSOS -msto +msto*VSHS_OP  +m2plus) * TSH3_2 + m2plus * TSH1 - (alpha_3_2 * (TSH3_2 - Tamb)) / cp_water)
+    - (-V_PSOS*VSHP_OP +V_PSOS -msto +msto*VSHS_OP  +m2plus) * TSH3_2 + m2plus * TSH1 \
+    - (alpha_sto * storage_surface * (TSH3_2 - Tamb)) / cp_water \
+    + (alpha_water * layer_surface * (TSH3_1 - TSH3_2)) /cp_water \
+    - (alpha_water * layer_surface * (TSH3_2 - TSH1)) /cp_water)
 
 #fourth Layer
 dotT1 = 1.0/m * (-V_PSOS * VSHP_CL * TSH1 + (-V_PSOS * VSHP_OP + V_PSOS - msto + msto * VSHS_OP  + m2plus) * TSH3_2 \
-    - m2plus * TSH1 + msto * VSHS_CL * TCO_1 - (alpha_1 * (TSH1 - Tamb)) / cp_water)
+    - m2plus * TSH1 + msto * VSHS_CL * TCO_1 \
+    - (alpha_sto * storage_surface * (TSH1 - Tamb)) / cp_water \
+    - (alpha_floor * floor_surface * (TSH1 - Tfloor)) / cp_water \
+    + (alpha_water * layer_surface * (TSH3_2 - TSH1)) /cp_water)
 #=================================================================================================================================================
 
 
@@ -264,12 +303,12 @@ pl.plot(time_points, pl.squeeze(sim_est.simulation_results[0,:]), label = r"sim 
 pl.plot(time_points, pl.squeeze(sim_est.simulation_results[1,:]), label = r"sim TSH2", color = "g")
 pl.plot(time_points, pl.squeeze(sim_est.simulation_results[2,:]), label = r"sim TSH3", color = "r")
 pl.plot(time_points, pl.squeeze(sim_est.simulation_results[3,:]), label = r"sim TSH1", color = "c")
-pl.plot(time_points, pl.squeeze(sim_est.simulation_results[4,:]), label = r"sim TSH0_1", color = "m")
-pl.plot(time_points, pl.squeeze(sim_est.simulation_results[5,:]), label = r"sim TSH0_2", color = "k")
-pl.plot(time_points, pl.squeeze(sim_est.simulation_results[6,:]), label = r"sim TSH2_1", color = "y")
-pl.plot(time_points, pl.squeeze(sim_est.simulation_results[7,:]), label = r"sim TSH2_2", color = "grey")
-pl.plot(time_points, pl.squeeze(sim_est.simulation_results[8,:]), label = r"sim TSH3_1", color = "saddlebrown")
-pl.plot(time_points, pl.squeeze(sim_est.simulation_results[9,:]), label = r"sim TSH3_2", color = "lime")
+# pl.plot(time_points, pl.squeeze(sim_est.simulation_results[4,:]), label = r"sim TSH0_1", color = "m")
+# pl.plot(time_points, pl.squeeze(sim_est.simulation_results[5,:]), label = r"sim TSH0_2", color = "k")
+# pl.plot(time_points, pl.squeeze(sim_est.simulation_results[6,:]), label = r"sim TSH2_1", color = "y")
+# pl.plot(time_points, pl.squeeze(sim_est.simulation_results[7,:]), label = r"sim TSH2_2", color = "grey")
+# pl.plot(time_points, pl.squeeze(sim_est.simulation_results[8,:]), label = r"sim TSH3_1", color = "saddlebrown")
+# pl.plot(time_points, pl.squeeze(sim_est.simulation_results[9,:]), label = r"sim TSH3_2", color = "lime")
 pl.plot(time_points[::500], data["TSOS"].values[int_start::500], label = r"meas TSOS", color = "darkorange")
 pl.title("storage model")
 pl.ylabel('temperature (C)')
@@ -296,4 +335,4 @@ pl.savefig("/home/da/Master/Thesis/Optimal-Control-Storage/plots_pe/10_schichten
         bbox_inches='tight')
 
 
-pl.show()
+# pl.show()
