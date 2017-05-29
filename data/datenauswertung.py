@@ -5,7 +5,7 @@ import numpy as np
 
 
 ########################
-date = "2017-03-12"
+date = "2017-02-04"
 start_time = "00:00:00"
 end_time = "23:59:59"
 ########################
@@ -121,12 +121,15 @@ data = data.astype(float)
 
 time_points = data["time"]
 
+## Mischverhaeltniss entnahme Speicher
+data['msto'] = data['PC_1'] * ((data['TCI_1'] - data['TCO_1']) / (data['TSH0'] - data ['TCO_1'])) 
+data.loc[data['msto'] < 0.0000000000000000000000000001, 'msto'] = 0.0 ## Negative Werter entfernen 
 
 
 ### calculate massflows from the layers
 
 # Calculate m0
-data_m0 = data['PSOS'] - data['msto'] 
+data_m0 = data['PSOS'] - data['PC_1'] 
 
 # data['m0'] = data['PSOS'] - data['PC_1'] 
 # data_m0 = data['m0']
@@ -147,7 +150,7 @@ data.loc[data['m0plus'] < 0.0000000000000000000000000001, 'm0plus'] = 0.0
 
 
 # Calculate m2
-data_m2 = - data['m0plus'] + data['m0minus'] - data['PSOS']*data['VSHP_OP'] + data['msto']*data['VSHS_OP'] 
+data_m2 = - data['m0plus'] + data['m0minus'] - data['PSOS']*data['VSHP_OP'] + data['PC_1']*data['VSHS_OP'] 
 
 # separate if m2minus or m2plus
 data['m2plus'] = data_m2[(data_m2 <= 0.0)]
@@ -163,7 +166,7 @@ data.loc[data['m2plus'] < 0.0000000000000000000000000001, 'm2plus'] = 0.0
 
 
 # Calculate m3
-data_m3 =  - data['PSOS']*data['VSHP_CL'] + data['msto']*data['VSHS_CL']
+data_m3 =  - data['PSOS']*data['VSHP_CL'] + data['PC_1']*data['VSHS_CL']
 
 # separate if m3minus or m3plus
 data['m3plus'] = data_m3[(data_m3 >= 0.0)]
@@ -177,9 +180,6 @@ data['m3plus'].fillna(0, inplace = True )
 data['m3minus'] = data['m3minus'] * (-1)
 data.loc[data['m3minus'] < 0.0000000000000000000000000001, 'm3minus'] = 0.0
 
-## Mischverhaeltniss entnahme Speicher
-data['msto'] = data['PC_1'] * ((data['TCI_1'] - data['TCO_1']) / (data['TSH0'] - data ['TCO_1'])) 
-data.loc[data['msto'] < 0.0000000000000000000000000001, 'msto'] = 0.0 ## Negative Werter entfernen 
 
 # Plotten
 pl.figure(figsize= (18,12))

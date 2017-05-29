@@ -1,5 +1,6 @@
 import pylab as pl
 import pandas as pd
+import numpy as np
 
 # import sys # for home
 # sys.path.append(r"C:\Users\alexa\Documents\Master\Python programme\casadi-py27-np1.9.1-v2.4.3")
@@ -10,7 +11,7 @@ import casiopeia as cp
 import matplotlib.pyplot as plt
 
 #############################
-datatable = "data2017-02-07"
+datatable = "data2017-02-03"
 #############################
 # datatable = "data2017-01-19"
 # datatable = "data2017-02-22"
@@ -24,28 +25,16 @@ datatable = "data2017-02-07"
 cp_water = 4182.0
 layer = 10.0
 Tamb = 20.0
-Tfloor = 18.0
-layer_surface = 0.9503 
-storage_height = 2.38
-storage_scope = 3.4558
-floor_surface = 0.9503
-storage_top_surface = 0.9503
-# alpha_water = 1000.0 #9.41282
-alpha_sto = 3.26264 #1.65034
-alpha_floor = 1.06409 #9.41282
-
-storage_surface = (storage_scope * (storage_height / layer) )
-
-# alpha_0 = 1.15482 
-# alpha_2 = 0.812026
-# alpha_3 = 0.523315
-# alpha_1 = 2.89951
-# alpha_0_1 = 0.827681
-# alpha_0_2 = 1.02636
-# alpha_2_1 = 1.19537
-# alpha_2_2 = 1.0
-# alpha_3_1 = 1.0
-# alpha_3_2 = 1.0
+alpha_0 = 1.15482 
+alpha_2 = 0.812026
+alpha_3 = 0.523315
+alpha_1 = 2.89951
+alpha_0_1 = 0.827681
+alpha_0_2 = 1.02636
+alpha_2_1 = 1.19537
+alpha_2_2 = 1.0
+alpha_3_1 = 1.0
+alpha_3_2 = 1.0
 
 
 
@@ -100,55 +89,46 @@ m = 2000.0 / layer
 
 #=================================================================================================================================================
 #first Layer
-dotT0 = 1.0/m * (V_PSOS * TSOS - msto * TSH0 - (m0plus + V_PSOS - msto) * TSH0 + m0plus * TSH0_1 \
-    - (alpha_sto * (storage_surface + storage_top_surface) * (TSH0 - Tamb)) / cp_water) + alpha_iso
+dotT0 = 1.0/m * (V_PSOS * TSOS - msto * TSH0 - (m0plus + V_PSOS - msto) * TSH0 + m0plus * TSH0_1 - (alpha_0 * (TSH0 - Tamb)) / cp_water) + alpha_iso
 #m0minus = (m0plus + V_PSOS - msto) 
 
 #layer1.1
 dotT0_1 = 1.0/m * ((m0plus + V_PSOS - msto) * TSH0 - m0plus * TSH0_1 - (m0plus + V_PSOS - msto) * TSH0_1 + m0plus * TSH0_2 \
-    - (alpha_sto * storage_surface * (TSH0_1 - Tamb)) / cp_water)
+    - (alpha_0_1 * (TSH0_1 - Tamb)) / cp_water)
 
 #layer1.2
 dotT0_2 = 1.0/m * ((m0plus + V_PSOS - msto) * TSH0_1 - m0plus * TSH0_2 - (m0plus + V_PSOS - msto) * TSH0_2 + m0plus * TSH2 \
-    - (alpha_sto * storage_surface * (TSH0_2 - Tamb)) / cp_water) 
+    - (alpha_0_2 * (TSH0_2 - Tamb)) / cp_water)
 
 #second Layer
 dotT2 = 1.0/m * ( -V_PSOS * VSHP_OP * TSH2 + msto * VSHS_OP * TCO_1 + (m0plus + V_PSOS - msto) * TSH0_2 - m0plus * TSH2  \
-    - (-V_PSOS * VSHP_OP + V_PSOS - msto + msto * VSHS_OP + m2plus) * TSH2 + m2plus * TSH2_1 \
-    - (alpha_sto * storage_surface * (TSH2 - Tamb)) / cp_water)
+    - (-V_PSOS * VSHP_OP + V_PSOS - msto + msto * VSHS_OP + m2plus) * TSH2 + m2plus * TSH2_1 - (alpha_2 * (TSH2 - Tamb)) / cp_water)
 #m2minus = (-V_PSOS*VSHP_OP +V_PSOS -msto +msto*VSHS_OP +m2plus)
 
 #layer2.1
 dotT2_1 = 1.0/m * ((-V_PSOS*VSHP_OP +V_PSOS -msto +msto*VSHS_OP +m2plus) * TSH2 - m2plus * TSH2_1 - \
-    (-V_PSOS*VSHP_OP +V_PSOS -msto +msto*VSHS_OP +m2plus) * TSH2_1 + m2plus * TSH2_2 \
-    - (alpha_sto * storage_surface * (TSH2_1 - Tamb)) / cp_water)
+    (-V_PSOS*VSHP_OP +V_PSOS -msto +msto*VSHS_OP +m2plus) * TSH2_1 + m2plus * TSH2_2 - alpha_2_1 * (TSH2_1 - Tamb) / cp_water)
 
 #layer2.2
 dotT2_2 = 1.0/m * ((-V_PSOS*VSHP_OP +V_PSOS -msto +msto*VSHS_OP +m2plus) * TSH2_1 - m2plus * TSH2_2 - \
-    (-V_PSOS*VSHP_OP +V_PSOS -msto +msto*VSHS_OP +m2plus) * TSH2_2 + m2plus * TSH3 \
-    - (alpha_sto * storage_surface * (TSH2_2 - Tamb)) / cp_water)
+    (-V_PSOS*VSHP_OP +V_PSOS -msto +msto*VSHS_OP +m2plus) * TSH2_2 + m2plus * TSH3 - alpha_2_2 * (TSH2_2 - Tamb) / cp_water)
 
 #third Layer
 dotT3 = 1.0/m * ((-V_PSOS * VSHP_OP + V_PSOS - msto + msto*VSHS_OP + m2plus) * TSH2_2 - m2plus * TSH3 \
-    - (-V_PSOS * VSHP_OP + V_PSOS - msto + msto * VSHS_OP  + m2plus) * TSH3 + m2plus * TSH3_1 \
-    - (alpha_sto * storage_surface * (TSH3 - Tamb)) / cp_water)
+    - (-V_PSOS * VSHP_OP + V_PSOS - msto + msto * VSHS_OP  + m2plus) * TSH3 + m2plus * TSH3_1 - (alpha_3 * (TSH3 - Tamb)) / cp_water)
 #m3minus = (-V_PSOS*VSHP_OP +V_PSOS -msto +msto*VSHS_OP  +m3plus)## m3minus ist m2minus und m3plus ist m2plus
 
 #leyer3.1
 dotT3_1 = 1.0/m * ((-V_PSOS*VSHP_OP +V_PSOS -msto +msto*VSHS_OP  +m2plus) * TSH3 - m2plus * TSH3_1 \
-    - (-V_PSOS*VSHP_OP +V_PSOS -msto +msto*VSHS_OP  +m2plus) * TSH3_1 + m2plus * TSH3_2 \
-    - (alpha_sto * storage_surface * (TSH3_1 - Tamb)) / cp_water)
+    - (-V_PSOS*VSHP_OP +V_PSOS -msto +msto*VSHS_OP  +m2plus) * TSH3_1 + m2plus * TSH3_2 - (alpha_3_1 * (TSH3_1 - Tamb)) / cp_water)
 
 #leyer3.2
 dotT3_2 = 1.0/m * ((-V_PSOS*VSHP_OP +V_PSOS -msto +msto*VSHS_OP  +m2plus) * TSH3_1 - m2plus * TSH3_2 \
-    - (-V_PSOS*VSHP_OP +V_PSOS -msto +msto*VSHS_OP  +m2plus) * TSH3_2 + m2plus * TSH1 \
-    - (alpha_sto * storage_surface * (TSH3_2 - Tamb)) / cp_water)
+    - (-V_PSOS*VSHP_OP +V_PSOS -msto +msto*VSHS_OP  +m2plus) * TSH3_2 + m2plus * TSH1 - (alpha_3_2 * (TSH3_2 - Tamb)) / cp_water)
 
 #fourth Layer
 dotT1 = 1.0/m * (-V_PSOS * VSHP_CL * TSH1 + (-V_PSOS * VSHP_OP + V_PSOS - msto + msto * VSHS_OP  + m2plus) * TSH3_2 \
-    - m2plus * TSH1 + msto * VSHS_CL * TCO_1 \
-    - (alpha_sto * storage_surface * (TSH1 - Tamb)) / cp_water \
-    - (alpha_floor * floor_surface * (TSH1 - Tfloor)) / cp_water)
+    - m2plus * TSH1 + msto * VSHS_CL * TCO_1 - (alpha_1 * (TSH1 - Tamb)) / cp_water)
 #=================================================================================================================================================
 
 
@@ -173,8 +153,9 @@ system = cp.system.System(x = x, u = u, f = f, phi = phi, p = p)
 
 # Start heating
 
+# int_start = 70400
 int_start = 0
-int_end = 86000
+# int_end = 75000
 # int_step = 1
 
 
@@ -259,68 +240,67 @@ sim_est.run_system_simulation(time_points = time_points, \
     x0 = xinit[0,:], udata = udata)
 
 
-
+# predictions = pd.DataFrame(predictions, columns=['predictions']).to_csv('prediction.csv')
+data2 = sim_est.simulation_results
+# data2 = pd.data
+# data2.to_csv('/home/da/Master/Thesis/Optimal-Control-Storage/mpc/' + 'mpc' + str(datatable) + 'start' + str(int_start) + '.csv', sep= ",")
+np.savetxt('/home/da/Master/Thesis/Optimal-Control-Storage/mpc/' + 'mpc' + str(datatable) + 'start' + str(int_start) + '.csv',data2 ,delimiter=',')
 
 pl.close("all")
 
 
-# # # Plot
+# # # # Plot
 
 
-pl.figure(figsize= (20,14))
-# pl.subplot(2, 1, 1)
-pl.subplot2grid((3, 1), (0, 0), rowspan=2)
+# pl.figure(figsize= (20,14))
+# # pl.subplot(2, 1, 1)
+# pl.subplot2grid((3, 1), (0, 0), rowspan=2)
 
-pl.scatter(time_points[::500], data["TSH0"].values[int_start::500], marker = "x", label = r"meas TSH0", color = "b")
-pl.scatter(time_points[::500], data["TSH2"].values[int_start::500], marker = "x", label = r"meas TSH2", color = "g")
-pl.scatter(time_points[::500], data["TSH3"].values[int_start::500], marker = "x", label = r"meas TSH3", color = "r")
-pl.scatter(time_points[::500], data["TSH1"].values[int_start::500], marker = "x", label = r"meas TSH1", color = "c")
-# pl.scatter(time_points[::500], data["TSH0_1"].values[int_start::500], marker = "x", label = r"meas TSH0_1", color = "m")
-# pl.scatter(time_points[::500], data["TSH0_2"].values[int_start::500], marker = "x", label = r"meas TSH0_2", color = "k")
-# pl.scatter(time_points[::500], data["TSH2_1"].values[int_start::500], marker = "x", label = r"meas TSH2_1", color = "y")
-# pl.scatter(time_points[::500], data["TSH2_2"].values[int_start::500], marker = "x", label = r"meas TSH2_2", color = "grey")
-# pl.scatter(time_points[::500], data["TSH3_1"].values[int_start::500], marker = "x", label = r"meas TSH3_1", color = "saddlebrown")
-# pl.scatter(time_points[::500], data["TSH3_2"].values[int_start::500], marker = "x", label = r"meas TSH3_2", color = "lime")
-pl.plot(time_points, pl.squeeze(sim_est.simulation_results[0,:]), label = r"sim TSH0", color = "b")
-pl.plot(time_points, pl.squeeze(sim_est.simulation_results[1,:]), label = r"sim TSH2", color = "g")
-pl.plot(time_points, pl.squeeze(sim_est.simulation_results[2,:]), label = r"sim TSH3", color = "r")
-pl.plot(time_points, pl.squeeze(sim_est.simulation_results[3,:]), label = r"sim TSH1", color = "c")
-# pl.plot(time_points, pl.squeeze(sim_est.simulation_results[4,:]), label = r"sim TSH0_1", color = "m")
-# pl.plot(time_points, pl.squeeze(sim_est.simulation_results[5,:]), label = r"sim TSH0_2", color = "k")
-# pl.plot(time_points, pl.squeeze(sim_est.simulation_results[6,:]), label = r"sim TSH2_1", color = "y")
-# pl.plot(time_points, pl.squeeze(sim_est.simulation_results[7,:]), label = r"sim TSH2_2", color = "grey")
-# pl.plot(time_points, pl.squeeze(sim_est.simulation_results[8,:]), label = r"sim TSH3_1", color = "saddlebrown")
-# pl.plot(time_points, pl.squeeze(sim_est.simulation_results[9,:]), label = r"sim TSH3_2", color = "lime")
-pl.plot(time_points[::500], data["TSOS"].values[int_start::500], label = r"meas TSOS", color = "darkorange")
-pl.title("storage model")
-pl.ylabel('temperature (C)')
-pl.xlabel('time (s)')
-pl.legend(loc = "upper left")
-# pl.legend(loc = "upper right")
-pl.xlim([time_points[0], int_end])
-pl.title("Scenario: " +  datatable , y=1.08)
+# pl.scatter(time_points[::500], data["TSH0"].values[int_start::500], marker = "x", label = r"meas TSH0", color = "b")
+# pl.scatter(time_points[::500], data["TSH2"].values[int_start::500], marker = "x", label = r"meas TSH2", color = "g")
+# pl.scatter(time_points[::500], data["TSH3"].values[int_start::500], marker = "x", label = r"meas TSH3", color = "r")
+# pl.scatter(time_points[::500], data["TSH1"].values[int_start::500], marker = "x", label = r"meas TSH1", color = "c")
+# # pl.scatter(time_points[::500], data["TSH0_1"].values[int_start::500], marker = "x", label = r"meas TSH0_1", color = "m")
+# # pl.scatter(time_points[::500], data["TSH0_2"].values[int_start::500], marker = "x", label = r"meas TSH0_2", color = "k")
+# # pl.scatter(time_points[::500], data["TSH2_1"].values[int_start::500], marker = "x", label = r"meas TSH2_1", color = "y")
+# # pl.scatter(time_points[::500], data["TSH2_2"].values[int_start::500], marker = "x", label = r"meas TSH2_2", color = "grey")
+# # pl.scatter(time_points[::500], data["TSH3_1"].values[int_start::500], marker = "x", label = r"meas TSH3_1", color = "saddlebrown")
+# # pl.scatter(time_points[::500], data["TSH3_2"].values[int_start::500], marker = "x", label = r"meas TSH3_2", color = "lime")
+# pl.plot(time_points, pl.squeeze(sim_est.simulation_results[0,:]), label = r"sim TSH0", color = "b")
+# pl.plot(time_points, pl.squeeze(sim_est.simulation_results[1,:]), label = r"sim TSH2", color = "g")
+# pl.plot(time_points, pl.squeeze(sim_est.simulation_results[2,:]), label = r"sim TSH3", color = "r")
+# pl.plot(time_points, pl.squeeze(sim_est.simulation_results[3,:]), label = r"sim TSH1", color = "c")
+# # pl.plot(time_points, pl.squeeze(sim_est.simulation_results[4,:]), label = r"sim TSH0_1", color = "m")
+# # pl.plot(time_points, pl.squeeze(sim_est.simulation_results[5,:]), label = r"sim TSH0_2", color = "k")
+# # pl.plot(time_points, pl.squeeze(sim_est.simulation_results[6,:]), label = r"sim TSH2_1", color = "y")
+# # pl.plot(time_points, pl.squeeze(sim_est.simulation_results[7,:]), label = r"sim TSH2_2", color = "grey")
+# # pl.plot(time_points, pl.squeeze(sim_est.simulation_results[8,:]), label = r"sim TSH3_1", color = "saddlebrown")
+# # pl.plot(time_points, pl.squeeze(sim_est.simulation_results[9,:]), label = r"sim TSH3_2", color = "lime")
+# pl.plot(time_points[::500], data["TSOS"].values[int_start::500], label = r"meas TSOS", color = "darkorange")
+# pl.title("storage model")
+# pl.ylabel('temperature (C)')
+# pl.xlabel('time (s)')
+# pl.legend(loc = "upper left")
+# # pl.legend(loc = "upper right")
+# pl.xlim([time_points[0], int_end])
+# pl.title("Scenario: " +  datatable , y=1.08)
 
-# pl.subplot(2, 1, 2)
-pl.subplot2grid((3, 1), (2, 0))
+# # pl.subplot(2, 1, 2)
+# pl.subplot2grid((3, 1), (2, 0))
 
-pl.plot( data["V_PSOS"], label = "m_PSOS")
-pl.plot( data["msto"], label = "msto")
-pl.xlabel('time (s)')
-pl.ylabel('massflow (kg/s)')
-pl.xlim([time_points[0], int_end])
-pl.legend(loc = "upper left")
+# pl.plot( data["V_PSOS"], label = "m_PSOS")
+# pl.plot( data["msto"], label = "msto")
+# pl.xlabel('time (s)')
+# pl.ylabel('massflow (kg/s)')
+# pl.xlim([time_points[0], int_end])
+# pl.legend(loc = "upper left")
 
 
-# pl.savefig("/home/da/Master/Thesis/Optimal-Control-Storage/plots_pe/10_schichten_inkl_warmeaustausch/" + str(datatable) + "_" \
+# pl.savefig("/home/da/Master/Thesis/Optimal-Control-Storage/plots_pe/10_schichten/" + str(datatable) + "_" \
 #    + "start_from_" + str(int_start) + "_" \
 #   #+ str(int_end)+\
 #    "storage.png", \
 #         bbox_inches='tight')
 
-pl.savefig("/home/da/Schreibtisch/Plots/2parameter/" + str(datatable) + "_" \
-   + "start_from_" + str(int_start) + "_" \
-  #+ str(int_end)+\
-   "storage.png", \
-        bbox_inches='tight')
 
-pl.show()
+# pl.show()

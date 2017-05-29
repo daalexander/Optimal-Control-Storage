@@ -5,7 +5,7 @@ import numpy as np
 
 
 ########################
-date = "2017-03-28"
+date = "2017-05-28"
 start_time = "00:00:00"
 end_time = "23:59:59"
 ########################
@@ -27,7 +27,7 @@ connection_string = "postgresql+psycopg2://stcs_student:stcs_student@w-stcs-serv
 ##===========================================================================================================
 ##ohne rolling_median
 query = """
-SELECT timestamp,tsh0,tsh1,tsh2,tsh3,tsos,psos,tshsi,vshs_op,vshs_cl,vshp_op,vshp_cl,pc_1,cch_1,tco_1,tci_1
+SELECT timestamp,tsh0,tsh1,tsh2,tsh3,tsos,psos,tshsi,vshs_op,vshs_cl,vshp_op,vshp_cl,pc_1,cch_1,tco_1,tci_1,a_in_1,tchgo_1
 FROM stcs.public.chillii
 WHERE timestamp > '""" + date + " " + start_time + \
 """' AND timestamp < '""" + date + " " + end_time + \
@@ -56,6 +56,8 @@ data["pc_1"] = pd.rolling_median(data["pc_1"], window=5, center=True).fillna(met
 data["cch_1"] = pd.rolling_median(data["cch_1"], window=5, center=True).fillna(method='bfill').fillna(method='ffill')
 data["tco_1"] = pd.rolling_median(data["tco_1"], window=5, center=True).fillna(method='bfill').fillna(method='ffill')
 data["tci_1"] = pd.rolling_median(data["tci_1"], window=5, center=True).fillna(method='bfill').fillna(method='ffill')
+data["a_in_1"] = pd.rolling_median(data["a_in_1"], window=5, center=True).fillna(method='bfill').fillna(method='ffill')
+data["tchgo_1"] = pd.rolling_median(data["tchgo_1"], window=5, center=True).fillna(method='bfill').fillna(method='ffill')
 ##===========================================================================================================
 
 # ## csv
@@ -81,9 +83,14 @@ data.rename(columns={'pc_1': 'PC_1'}, inplace=True)
 data.rename(columns={'cch_1': 'CCH_1'}, inplace=True)
 data.rename(columns={'tco_1': 'TCO_1'}, inplace=True)
 data.rename(columns={'tci_1': 'TCI_1'}, inplace=True)
+data.rename(columns={'a_in_1': 'A_IN_1'}, inplace=True)
+data.rename(columns={'tchgo_1': 'TCHGO_1'}, inplace=True)
+
+## Massflow in kg/s
+data['A_IN_1'] = data['A_IN_1'] / 60.0
 
 ## set true/false to 1/0
-data[['VSHS_OP','VSHS_CL','VSHP_OP','VSHP_CL']] = data[['VSHS_OP','VSHS_CL','VSHS_OP','VSHS_CL']].astype(int)
+data[['VSHS_OP','VSHS_CL','VSHP_OP','VSHP_CL','CCH_1']] = data[['VSHS_OP','VSHS_CL','VSHS_OP','VSHS_CL','CCH_1']].astype(int)
 
 ## correction of Temperature Delta
 data['TSOS'] = data['TSOS'] - 0
@@ -163,8 +170,20 @@ data = data.astype(float)
 time_points = data["time"]
 
 ## Mischverhaeltniss entnahme Speicher
-data['msto'] = data['PC_1'] * ((data['TCI_1'] - data['TCO_1']) / (data['TSH0'] - data ['TCO_1'])) 
+# data['msto'] = data['PC_1'] * ((data['TCI_1'] - data['TCO_1']) / (data['TSH0'] - data ['TCO_1']))  #### for heating
+# data['msto'] = map(lambda x: data['A_IN_1'] if data['CCH_1'] == 1 \
+# 	else data['PC_1'] * ((data['TCI_1'] - data['TCO_1']) / (data['TSH0'] - data ['TCO_1']))
+# data['msto'] = np.where(data['CCH_1']=1, data['A_IN_1'], np.where(data['CCH_1']=0, data['PC_1'] * ((data['TCI_1'] - data['TCO_1']) / (data['TSH0'] - data ['TCO_1'])), 0))
+
+## searching cooling or heating
+data.loc[data['CCH_1'] >= 1, 'msto'] = data['A_IN_1']
+data.loc[data['CCH_1'] <= 0, 'msto'] = data['PC_1'] * ((data['TCI_1'] - data['TCO_1']) / (data['TSH0'] - data ['TCO_1']))
+
 data.loc[data['msto'] < 0.0000000000000000000000000001, 'msto'] = 0.0 ## Negative Werter entfernen 
+
+## calculation return flow temperatur
+data['TRF'] = data['TCO_1']
+data.loc[data['CCH_1'] >= 1, 'TRF'] = data['TCHGO_1']
 
 ### calculate massflows from the layers
 
@@ -224,9 +243,9 @@ data.loc[data['m3minus'] < 0.0000000000000000000000000001, 'm3minus'] = 0.0
 # Plotten
 pl.figure(figsize= (18,12))
 pl.subplot(2, 1, 1)
-pl.plot(time_points , data["PSOS"], label = "PSOS")
+pl.plot(time_points , data["PSOS"], label = "m_PSOS")
 pl.plot(time_points , data["msto"], label = "msto")
-
+pl.plot(time_points , data["CCH_1"], label = "CCH_1")
 # pl.plot(data.index , data["TSOS"], label = "TSOS")
 # pl.plot(data.index , data["TSH0"], label = "TSH0")
 # pl.plot(data.index , data["TSH1"], label = "TSH1")
@@ -248,6 +267,7 @@ pl.plot(time_points , data["TSH1"], label = "TSH1")
 
 pl.plot(time_points , data["TSH2"], label = "TSH2")
 pl.plot(time_points , data["TSH3"], label = "TSH3")
+pl.plot(time_points , data["TSOS"], label = "TSOS", color = "darkorange")
 
 # pl.plot(time_points , data["TSH0_1"], label = "TSH0_1")
 # pl.plot(time_points , data["TSH0_2"], label = "TSH0_2")

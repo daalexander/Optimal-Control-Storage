@@ -10,7 +10,7 @@ import casiopeia as cp
 import matplotlib.pyplot as plt
 
 #############################
-datatable = "data2017-03-10"
+datatable = "data2017-02-03"
 #############################
 # datatable = "data2017-01-19"
 # datatable = "data2017-02-22"
@@ -248,11 +248,11 @@ pl.xlim([time_points[0], 86000])
 pl.title("Scenario: " +  datatable , y=1.08)
 
 
-pl.savefig("/home/da/Master/Thesis/Optimal-Control-Storage/plots_pe/m2_anpassung/" + str(datatable) + "_" \
-   + "start_from_" + str(int_start) + "_" \
-  #+ str(int_end)+\
-   "storage.png", \
-        bbox_inches='tight')
+# pl.savefig("/home/da/Master/Thesis/Optimal-Control-Storage/plots_pe/m2_anpassung/" + str(datatable) + "_" \
+#    + "start_from_" + str(int_start) + "_" \
+#   #+ str(int_end)+\
+#    "storage.png", \
+#         bbox_inches='tight')
 
 
 pl.show()

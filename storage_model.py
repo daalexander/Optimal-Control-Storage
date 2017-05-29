@@ -10,7 +10,7 @@ import casiopeia as cp
 import matplotlib.pyplot as plt
 
 #############################
-datatable = "data2017-01-19"
+datatable = "data2017-02-03"
 #############################
 # datatable = "data2017-01-19"
 # datatable = "data2017-02-22"
@@ -130,11 +130,13 @@ system = cp.system.System(x = x, u = u, f = f, phi = phi, p = p)
 # Start heating
 
 int_start = 0
-# int_end = [1000]
+int_end = 86000
 # int_step = 1
 
 
 #20161015 "Intervalle/20160303_Intervall7.csv"
+# data = pd.read_table("data-ausgewertet/"+ datatable + ".csv", \
+#     delimiter=",", index_col=0)
 data = pd.read_table("data-ausgewertet/"+ datatable + ".csv", \
     delimiter=",", index_col=0)
 
@@ -215,10 +217,11 @@ pl.close("all")
 # # # Plot
 
 
-pl.figure(figsize= (16,10))
-
+# pl.figure(figsize= (16,10))
+pl.figure(figsize= (20,14))
 
 # pl.subplot(1, 1, 1)
+pl.subplot2grid((3, 1), (0, 0), rowspan=2)
 pl.scatter(time_points[::500], data["TSH0"].values[int_start::500], marker = "x", label = r"meas TSH0", color = "b")
 pl.scatter(time_points[::500], data["TSH2"].values[int_start::500], marker = "x", label = r"meas TSH2", color = "g")
 pl.scatter(time_points[::500], data["TSH3"].values[int_start::500], marker = "x", label = r"meas TSH3", color = "r")
@@ -227,19 +230,29 @@ pl.plot(time_points, pl.squeeze(sim_est.simulation_results[0,:]), label = r"sim 
 pl.plot(time_points, pl.squeeze(sim_est.simulation_results[1,:]), label = r"sim TSH2", color = "g")
 pl.plot(time_points, pl.squeeze(sim_est.simulation_results[2,:]), label = r"sim TSH3", color = "r")
 pl.plot(time_points, pl.squeeze(sim_est.simulation_results[3,:]), label = r"sim TSH1", color = "c")
+pl.plot(time_points[::500], data["TSOS"].values[int_start::500], label = r"meas TSOS", color = "darkorange")
 pl.title("storage model")
 pl.ylabel('temperature (C)')
 pl.xlabel('time (s)')
 pl.legend(loc = "upper left")
-pl.xlim([time_points[0], 86000])
+pl.xlim([time_points[0], int_end])
 pl.title("Scenario: " +  datatable , y=1.08)
 
+pl.subplot2grid((3, 1), (2, 0))
 
-pl.savefig("/home/da/Master/Thesis/Optimal-Control-Storage/plots_pe/test_sim_mit_30l/" + str(datatable) + "_" \
-   + "start_from_" + str(int_start) + "_" \
-  #+ str(int_end)+\
-   "storage.png", \
-        bbox_inches='tight')
+pl.plot( data["V_PSOS"], label = "m_PSOS")
+pl.plot( data["msto"], label = "msto")
+pl.xlabel('time (s)')
+pl.ylabel('massflow (kg/s)')
+pl.xlim([time_points[0], int_end])
+pl.legend(loc = "upper left")
+
+
+# pl.savefig("/home/da/Master/Thesis/Optimal-Control-Storage/plots_pe/test_sim_mit_30l/" +"_prasi_" + str(datatable) + "_" \
+#    + "start_from_" + str(int_start) + "_" \
+#   #+ str(int_end)+\
+#    "storage.png", \
+#         bbox_inches='tight')
 
 
 pl.show()
