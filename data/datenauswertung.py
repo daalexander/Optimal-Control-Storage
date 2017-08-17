@@ -10,11 +10,9 @@ start_time = "00:00:00"
 end_time = "23:59:59"
 ########################
 
-## auslesen direkt aus datenbank
+## auslesen  aus datenbank
 connection_string = "postgresql+psycopg2://stcs_student:stcs_student@w-stcs-services:5432/stcs"
-# connection_string = "postgresql+psycopg2://stcs_student:stcs_student@w-stcs-services.hs-karlsruhe.de:5432/stcs"
 
-## Zeitpunkt muss hier angepasst werden
 query = """
 SELECT timestamp,tsh0,tsh1,tsh2,tsh3,tsos,psos,tshsi,vshs_op,vshs_cl,vshp_op,vshp_cl,pc_1,cch_1,tco_1,tci_1
 FROM stcs.public.chillii_rolling_median
@@ -25,11 +23,7 @@ WHERE timestamp > '""" + date + " " + start_time + \
 
 data = pd.read_sql_query(query, con=connection_string)
 
-# ## aktuelle csv
-# nametable = "20170223"
-# data = pd.read_table(nametable+'.csv', sep = ",") #index_col=0)
-# data = data[["timestamp","tsh0","tsh1", "tsh2", "tsh3", "tsos", "psos", "tshsi", "vshs_op", "vshs_cl", "vshp_op", "vshp_cl", "pc_1", "cch_1", "tco_1"]]
-# # data = data.drop(data.index[0])
+
 
 ## rename collumns 
 data.rename(columns={'timestamp': 'time'}, inplace=True)
@@ -61,55 +55,20 @@ data['TSH1'] = data['TSH1'] - 0.4
 data['TCO_1'] = data['TCO_1'] - 0.4
 data['TCI_1'] = data['TCI_1'] - 0.5
 
-# # alte csv
-# #=================================================================================================================================================
-# date = "20160930"
-# data = pd.read_table(date+'.csv', sep = ";") #index_col=0)
-# data = data[["Uhrzeit","TSH0","TSH1", "TSH2", "TSH3", "TSOS", "PSOS", "TSHSI", "VSHS_OP", "VSHS_CL", "VSHP_OP", "VSHP_CL", "PC_1", "CCH_1", "TCO_1", "TCI_1"]]
-# data = data.drop(data.index[0])
 
-# data["Uhrzeit"] = map(lambda x: "23.10.2016" + " " + x, data["Uhrzeit"])
-# data["Uhrzeit"] = pd.to_datetime(data["Uhrzeit"])
-# data["Uhrzeit"] = map(lambda x: x + datetime.timedelta(minutes=38), data["Uhrzeit"])
-# data.sort_values(by='Uhrzeit')
-# #=================================================================================================================================================
-
-
-
-#data["PSOP"] = pd.to_numeric(data["PSOP"])
 data["PSOS"] = pd.to_numeric(data["PSOS"])
 data["PC_1"] = pd.to_numeric(data["PC_1"])
-#
-## ungefaehre Umrechnung von Spannung auf Massenstrom
-# data["PSOS"] = map(lambda x: 0 if x == 0 else (( x - 50.0 ) * ((36.0 - 23.5)/(100.0-50.0)) + 23.5) / 60.0, data["PSOS"])
-data["PSOS"] = map(lambda x: 0 if x == 0 else (( x - 50.0 ) * ((30.0 - 19.6)/(100.0-50.0)) + 19.6) / 60.0, data["PSOS"])## korrekt Test30l
-# data["PC_1"] = map(lambda x: 0 if x == 0 else (( x - 50.0 ) * ((36.0 - 23.5)/(100.0-50.0)) + 23.5) / 60.0, data["PC_1"])
-# data["PC_1"] = map(lambda x: 0 if x == 0 else (( x - 50.0 ) * ((34.0 - 20.3)/(100.0-50.0)) + 20.3) / 60.0, data["PC_1"]) ## keine Beimischung
-data["PC_1"] = map(lambda x: 0 if x == 0 else (( x - 50.0 ) * ((30.0 - 18.3)/(100.0-50.0)) + 18.3) / 60.0, data["PC_1"]) ## volle Beimischung
 
-# #=======================================================
-# # Negative Werte durch 0 ersetzen
-# data = data.clip(lower=0)
-# data = data.rename(columns={'Uhrzeit': 'time'}) ## alte csv
-# # Timestamps zu Floats und auf Null setzen
-# data["time"] = map(lambda y: float(y.seconds), data["time"] - data["time"][1]) #alte csv
-# #=======================================================
+## ungefaehre Umrechnung von Spannung auf Massenstrom
+
+data["PSOS"] = map(lambda x: 0 if x == 0 else (( x - 50.0 ) * ((30.0 - 19.6)/(100.0-50.0)) + 19.6) / 60.0, data["PSOS"])
+data["PC_1"] = map(lambda x: 0 if x == 0 else (( x - 50.0 ) * ((30.0 - 18.3)/(100.0-50.0)) + 18.3) / 60.0, data["PC_1"]) 
+
 
 dt  = map(lambda x: (x-data["time"][0]).total_seconds(), data["time"]) #aus Datenbank
 data['time'] = dt # datenbank
 
-# Mittelwert von FlowSolarSek auf 36l/min
-#data["FlowSolarSek"] = map(lambda x: 35, data["FlowSolarSek"])
 
-#==============================================================================
-# # Messreihen verschieben
-# data["TSOS"] = data["TSOS"].shift(periods=-1, freq=None, axis=0)
-# data["TSH2"] = data["TSH2"].shift(periods=1, freq=None, axis=0)
-# data["TSH1"] = data["TSH1"].shift(periods=1, freq=None, axis=0)
-# data = data[pd.notnull(data["TSOS"])]
-# data = data[pd.notnull(data["TSH1"])]
-# data = data[pd.notnull(data["TSH2"])]
-#==============================================================================
 # start = 4370
 # end = 6640
 # step = 1
@@ -131,9 +90,6 @@ data.loc[data['msto'] < 0.0000000000000000000000000001, 'msto'] = 0.0 ## Negativ
 # Calculate m0
 data_m0 = data['PSOS'] - data['PC_1'] 
 
-# data['m0'] = data['PSOS'] - data['PC_1'] 
-# data_m0 = data['m0']
-
 # separate if m0minus or m0plus
 data['m0plus'] = data_m0[(data_m0 <= 0.0)]
 data['m0minus'] = data_m0[(data_m0 >= 0.0)]
@@ -144,8 +100,7 @@ data['m0plus'].fillna(0, inplace = True )
 
 # Change negative massflow from m0plus into positive
 data['m0plus'] = data['m0plus'] * (-1)
-# data['m0plus'].replace( -0.0 , 0.0)
-# data['m0plus'] = data['m0plus'].clip(lower=0.0000000000000000000000000000000001)
+
 data.loc[data['m0plus'] < 0.0000000000000000000000000001, 'm0plus'] = 0.0
 
 
@@ -187,16 +142,7 @@ pl.subplot(2, 1, 1)
 pl.plot(time_points , data["PSOS"], label = "PSOS")
 pl.plot(time_points , data["msto"], label = "msto")
 
-# pl.plot(data.index , data["TSOS"], label = "TSOS")
-# pl.plot(data.index , data["TSH0"], label = "TSH0")
-# pl.plot(data.index , data["TSH1"], label = "TSH1")
 
-# pl.plot(data.index , data["TSH2"], label = "TSH2")
-# pl.plot(data.index , data["TSH3"], label = "TSH3")
-
-# pl.plot(data.index , data["TCO_1"], label = "TCO_1")
-
-# pl.plot(data.index , data["TSHSI"], label = "TSHSI")
 pl.xlabel('time (s)')
 pl.ylabel('massflow (kg/s)')
 pl.legend(loc = "upper left")

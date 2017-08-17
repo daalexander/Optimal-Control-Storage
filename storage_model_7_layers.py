@@ -1,10 +1,5 @@
 import pylab as pl
 import pandas as pd
-
-# import sys # for home
-# sys.path.append(r"C:\Users\alexa\Documents\Master\Python programme\casadi-py27-np1.9.1-v2.4.3")
-# sys.path.append(r"C:\Users\alexa\Documents\Master\Python programme\casiopeia")
-
 import casadi as ca
 import casiopeia as cp
 import matplotlib.pyplot as plt
@@ -12,11 +7,6 @@ import matplotlib.pyplot as plt
 #############################
 datatable = "data2017-02-03"
 #############################
-# datatable = "data2017-01-19"
-# datatable = "data2017-02-22"
-# datatable = "data2017-02-27"
-# datatable = "data2017-02-23"
-# datatable = "data2017-03-07"
 
 
 # Constants
@@ -24,13 +14,13 @@ datatable = "data2017-02-03"
 cp_water = 4182.0
 layer = 7
 Tamb = 20.0
-alpha_0 = 1.64974 #0.78259 #2.88704
-alpha_2 = 1.16004 #0.960049 #2.03007
-alpha_3 = 0.747592 #0.864831 #1.30829
-alpha_1 = 4.14216 #1.2278 #7.24879
-alpha_0_5 = 1.40556 #0.86961 
-alpha_2_5 = 0.952077 #0.912654
-alpha_3_5 = 2.15456 #1.01466
+alpha_0 = 1.64974 
+alpha_2 = 1.16004 
+alpha_3 = 0.747592 
+alpha_1 = 4.14216 
+alpha_0_5 = 1.40556 
+alpha_2_5 = 0.952077 
+alpha_3_5 = 2.15456 
 
 
 
@@ -51,8 +41,6 @@ TSH3_5  = x[6]
 
 p = ca.MX.sym("p", 1)
 alpha_iso = p[0]
-
-# pinit = ca.vertcat([u_radiator_init]) # from pe_step3
 
 
 # Controls
@@ -136,14 +124,11 @@ int_start = 0
 # int_step = 1
 
 
-#20161015 "Intervalle/20160303_Intervall7.csv"
+#
 data = pd.read_table("data-ausgewertet/7_layer/"+ datatable + ".csv", \
     delimiter=",", index_col=0)
 
 
-# for k,e in enumerate(int_start):
-
-    # time_points = pl.linspace(0, int_end[k] - e - 1, int_end[k] - e) * 13 #*13 for seconds
 
 time_points = data["time"].values[int_start:]
 
@@ -191,16 +176,6 @@ x6_init = data["TSH3_5"].values[int_start]
 xinit = ca.horzcat([pl.atleast_2d(x0_init).T, pl.atleast_2d(x1_init).T, pl.atleast_2d(x2_init).T, pl.atleast_2d(x3_init).T, \
     pl.atleast_2d(x4_init).T, pl.atleast_2d(x5_init).T, pl.atleast_2d(x6_init).T,])
 
-
-#     # wv = pl.ones(ydata.shape[0])
-#     # wv[:int(ydata.shape[0]*0.1)] = 5
-
-#     pe_setups.append(cp.pe.LSq(system = system, time_points = time_points, \
-#         udata = udata, \
-#         #pinit = pinit, \
-#         #ydata = ydata, \
-#         xinit = xinit)) #, \
-#         # wv = wv))
 
 
 # mpe = cp.pe.MultiLSq(pe_setups)

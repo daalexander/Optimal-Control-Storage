@@ -12,7 +12,7 @@ end_time = "20:59:59"
 
 ## auslesen direkt aus datenbank
 connection_string = "postgresql+psycopg2://stcs_student:stcs_student@w-stcs-services:5432/stcs"
-# connection_string = "postgresql+psycopg2://stcs_student:stcs_student@w-stcs-services.hs-karlsruhe.de:5432/stcs"
+
 
 ## Zeitpunkt muss hier angepasst werden
 query = """
@@ -54,8 +54,8 @@ data['TCI_1'] = data['TCI_1'] - 0.5
 ##Umrechnung prozent auf masse
 data["PSOS"] = pd.to_numeric(data["PSOS"])
 data["PC_1"] = pd.to_numeric(data["PC_1"])
-# data["PSOS"] = map(lambda x: 0 if x == 0 else (( x - 50.0 ) * ((36.0 - 23.5)/(100.0-50.0)) + 23.5) / 60.0, data["PSOS"])
-data["PSOS"] = map(lambda x: 0 if x == 0 else (( x - 50.0 ) * ((30.0 - 18.3)/(100.0-50.0)) + 18.3) / 60.0, data["PSOS"])## korrekt Test30l
+
+data["PSOS"] = map(lambda x: 0 if x == 0 else (( x - 50.0 ) * ((30.0 - 18.3)/(100.0-50.0)) + 18.3) / 60.0, data["PSOS"])
 data["PC_1"] = map(lambda x: 0 if x == 0 else (( x - 50.0 ) * ((30.0 - 18.3)/(100.0-50.0)) + 18.3) / 60.0, data["PC_1"])
 
 dt  = map(lambda x: (x-data["time"][0]).total_seconds(), data["time"]) #aus Datenbank

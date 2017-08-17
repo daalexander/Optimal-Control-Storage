@@ -1,10 +1,5 @@
 import pylab as pl
 import pandas as pd
-
-# import sys # for home
-# sys.path.append(r"C:\Users\alexa\Documents\Master\Python programme\casadi-py27-np1.9.1-v2.4.3")
-# sys.path.append(r"C:\Users\alexa\Documents\Master\Python programme\casiopeia")
-
 import casadi as ca
 import casiopeia as cp
 import matplotlib.pyplot as plt
@@ -12,11 +7,8 @@ import matplotlib.pyplot as plt
 #############################
 datatable = "data2017-02-03"
 #############################
-# datatable = "data2017-01-19"
-# datatable = "data2017-02-22"
-# datatable = "data2017-02-27"
-# datatable = "data2017-02-23"
-# datatable = "data2017-03-07"
+
+
 
 
 # Constants
@@ -24,12 +16,10 @@ datatable = "data2017-02-03"
 cp_water = 4182.0
 layer = 4
 Tamb = 20.0
-alpha_0 = 2.88704#2.1134680556#1.58862###3.04966#1.65947#3.04966#1.93175#0.218024#
-alpha_2 = 2.03007#1.5473692778#2.32926###1.99152#1.24433#1.99152#2.38966#2.11546#
-alpha_3 = 1.30829#1.3780082778#1.05698###0.789104#2.45329#0.789104#1.07585#2.2112#
-alpha_1 = 7.24879#7.6578727778#12.43###8.87481#5.72889#8.87481#15.2428#3.38075#
-
-
+alpha_0 = 2.88704
+alpha_2 = 2.03007
+alpha_3 = 1.30829
+alpha_1 = 7.24879
 
 
 # States
@@ -45,8 +35,6 @@ TSH1  = x[3]
 
 p = ca.MX.sym("p", 1)
 alpha_iso = p[0]
-
-# pinit = ca.vertcat([u_radiator_init]) # from pe_step3
 
 
 # Controls
@@ -72,25 +60,6 @@ VSHS_CL = u[13]
 
 m = 2000.0 / layer
 
-# Massflows storage
-
-# ## without VSHS_CL/OP and VSHP_CL/OP
-# #first Layer
-# dotT0 = 1.0/m * (V_PSOS * TSOS - msto * TSH0 - (m0plus + V_PSOS - msto) * TSH0 + m0plus * TSH2) + alpha_iso
-# #m0minus = m0plus + V_PSOS - msto 
-
-# #second Layer
-# dotT2 = 1.0/m * ( -V_PSOS * TSH2 + msto * TCO_1 + (m0plus + V_PSOS - msto) * TSH0 - m0plus * TSH2  \
-#     - (-V_PSOS + V_PSOS - msto + msto + m2plus) * TSH2 + m2plus * TSH3)
-# #m2minus = -V_PSOS +V_PSOS -msto +msto +m2plus
-
-# #third Layer
-# dotT3 = 1.0/m * ((-V_PSOS + V_PSOS - msto + msto + m2plus) * TSH2 - m2plus * TSH3 \
-#     - (-V_PSOS + V_PSOS - msto + msto  + m3plus) * TSH3 + m3plus * TSH1)
-# #m3minus = -V_PSOS +V_PSOS -msto +msto  +m3plus
-
-# #fourth Layer
-# dotT1 = 1.0/m * (-V_PSOS * TSH1 + (-V_PSOS + V_PSOS - msto + msto  + m3plus) * TSH3 - m3plus * TSH1 + msto * TCO_1)
 
 #=================================================================================================================================================
 ## with VSHS_CL/OP and VSHP_CL/OP
@@ -133,17 +102,9 @@ int_start = 0
 int_end = 86000
 # int_step = 1
 
-
-#20161015 "Intervalle/20160303_Intervall7.csv"
-# data = pd.read_table("data-ausgewertet/"+ datatable + ".csv", \
-#     delimiter=",", index_col=0)
 data = pd.read_table("data-ausgewertet/"+ datatable + ".csv", \
     delimiter=",", index_col=0)
 
-
-# for k,e in enumerate(int_start):
-
-    # time_points = pl.linspace(0, int_end[k] - e - 1, int_end[k] - e) * 13 #*13 for seconds
 
 time_points = data["time"].values[int_start:]
 
@@ -188,15 +149,6 @@ x3_init = data["TSH1"].values[int_start]
 
 xinit = ca.horzcat([pl.atleast_2d(x0_init).T, pl.atleast_2d(x1_init).T, pl.atleast_2d(x2_init).T, pl.atleast_2d(x3_init).T,]) 
 
-#     # wv = pl.ones(ydata.shape[0])
-#     # wv[:int(ydata.shape[0]*0.1)] = 5
-
-#     pe_setups.append(cp.pe.LSq(system = system, time_points = time_points, \
-#         udata = udata, \
-#         #pinit = pinit, \
-#         #ydata = ydata, \
-#         xinit = xinit)) #, \
-#         # wv = wv))
 
 
 # mpe = cp.pe.MultiLSq(pe_setups)
